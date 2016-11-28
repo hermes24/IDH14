@@ -11,7 +11,7 @@ package idh14.client;
  */
 
 
-public class mainClient {
+public class MainClient {
     
     /**
      * @param args the command line arguments
