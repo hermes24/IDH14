@@ -1,16 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package idh14.main;
+package idh14.client;
 
-import idh14.client.ClientUI;
 
 /**
- *
- * @author luche
+ * File Sharing
+ * 
+ * Luc Hermes  |  Eric Marsilje  |  Joost van Stuijvenberg
+ * 
+ * Avans Hogeschool Breda - IDH14
+ * November/December 2016
  */
+
+
 public class mainClient {
     
     /**

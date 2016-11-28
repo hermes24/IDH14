@@ -1,27 +1,33 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package idh14.client;
 
 import java.io.File;
-
+import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 /**
+ * File Sharing
  *
- * @author luche
+ * Luc Hermes | Eric Marsilje | Joost van Stuijvenberg
+ *
+ * Avans Hogeschool Breda - IDH14 November/December 2016
  */
 public class ClientUI extends javax.swing.JFrame {
 
-    
+    private String location = "C:\\Sharebox\\";
+
     /**
      * Creates new form ClientUI
      */
     public ClientUI() {
         initComponents();
         settingsPanel.setVisible(false);
-        getLocalFileList();
+        getLocalFileList(location);
 
     }
 
@@ -71,10 +77,20 @@ public class ClientUI extends javax.swing.JFrame {
         });
 
         buttonUpdateLocalList.setText("Update List ");
+        buttonUpdateLocalList.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonUpdateLocalListActionPerformed(evt);
+            }
+        });
 
         buttonUploadLocalFile.setText("Upload");
 
         buttonDeleteLocalFile.setText("Delete");
+        buttonDeleteLocalFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonDeleteLocalFileActionPerformed(evt);
+            }
+        });
 
         buttonUpdateServerList.setText("Update List");
 
@@ -162,13 +178,19 @@ public class ClientUI extends javax.swing.JFrame {
 
         historyLabel.setText("History");
 
-        localFolderText.setText("C:\\FileSharing\\");
+        localFolderText.setEditable(false);
+        localFolderText.setText("C:\\");
 
             serverIPText.setText("192.168.178.11");
 
             serverPortText.setText("8080");
 
             browseButton.setText("Browse");
+            browseButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    browseButtonActionPerformed(evt);
+                }
+            });
 
             connectButton.setText("Connect");
 
@@ -273,6 +295,7 @@ public class ClientUI extends javax.swing.JFrame {
     private void mainMenuButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mainMenuButtonActionPerformed
         mainPanel.setVisible(true);
         settingsPanel.setVisible(false);
+        getLocalFileList(location);
     }//GEN-LAST:event_mainMenuButtonActionPerformed
 
     private void settingsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_settingsButtonActionPerformed
@@ -280,19 +303,72 @@ public class ClientUI extends javax.swing.JFrame {
         settingsPanel.setVisible(true);
     }//GEN-LAST:event_settingsButtonActionPerformed
 
-    private void getLocalFileList(){
-        
+    private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
+
+        // Create FileChooser windows 'dialog' to select local folder.
+        // C:\ is default location when opening dialog. 
+        JFileChooser dialog = new JFileChooser();
+        dialog.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        dialog.setAcceptAllFileFilterUsed(false);
+        dialog.setCurrentDirectory(new java.io.File("C:\\"));
+
+        // Extra logging.
+        if (dialog.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            System.out.println("getCurrentDirectory(): " + dialog.getCurrentDirectory());
+            System.out.println("getSelectedFile() : " + dialog.getSelectedFile());
+        } else {
+            System.out.println("No Selection ");
+        }
+
+        // Place selected folder in textfield & set location variable
+        localFolderText.setText(dialog.getSelectedFile().toString());
+        location = dialog.getSelectedFile().toString() + "\\";
+    }//GEN-LAST:event_browseButtonActionPerformed
+
+    private void buttonUpdateLocalListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUpdateLocalListActionPerformed
+        getLocalFileList(location);
+        System.out.println("File list refreshed, current folder: " + location);
+    }//GEN-LAST:event_buttonUpdateLocalListActionPerformed
+
+    private void buttonDeleteLocalFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteLocalFileActionPerformed
+
+        // Remove selected file in locallist
+        // When no file selected, user receives a error message
+        if (listLocalFiles.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(null, "Please select a local file");
+        } else {
+
+            Path uri = Paths.get(location + listLocalFiles.getSelectedItem());
+            try {
+                Files.delete(uri);
+                listLocalFiles.remove(listLocalFiles.getSelectedIndex());
+                System.out.println(uri + " is deleted");
+            } catch (NoSuchFileException x) {
+                System.err.format("%s: no such" + " file or directory%n", uri);
+            } catch (DirectoryNotEmptyException x) {
+                System.err.format("%s not empty%n", uri);
+            } catch (IOException x) {
+                // File permission problems are caught here.
+                System.err.println(x);
+
+            }
+
+        }
+
+    }//GEN-LAST:event_buttonDeleteLocalFileActionPerformed
+
+    private void getLocalFileList(String location) {
+
         // Get files from local folder. C:\Sharebox\ will be used as default folder. 
         // Folder can be changed from settings menu within app.
-        
-        File folder = new File("C:\\Sharebox\\");
+        File folder = new File(location);
         File[] listOfFiles = folder.listFiles();
-        
+        listLocalFiles.clear();
+
         for (int i = 0; i < listOfFiles.length; i++) {
             listLocalFiles.add(listOfFiles[i].getName());
         }
     }
-  
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton browseButton;
@@ -322,4 +398,5 @@ public class ClientUI extends javax.swing.JFrame {
     private javax.swing.JLabel settingsLabel;
     private javax.swing.JPanel settingsPanel;
     // End of variables declaration//GEN-END:variables
+
 }

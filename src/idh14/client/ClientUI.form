@@ -144,6 +144,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Update List "/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonUpdateLocalListActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="buttonUploadLocalFile">
           <Properties>
@@ -154,6 +157,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Delete"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonDeleteLocalFileActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="buttonUpdateServerList">
           <Properties>
@@ -310,7 +316,8 @@
         </Component>
         <Component class="javax.swing.JTextField" name="localFolderText">
           <Properties>
-            <Property name="text" type="java.lang.String" value="C:\u005cFileSharing\u005c" containsInvalidXMLChars="true"/>
+            <Property name="editable" type="boolean" value="false"/>
+            <Property name="text" type="java.lang.String" value="C:\u005c" containsInvalidXMLChars="true"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="serverIPText">
@@ -327,6 +334,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Browse"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="browseButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="connectButton">
           <Properties>
