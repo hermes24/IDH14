@@ -65,7 +65,7 @@ public class ClientUI extends javax.swing.JFrame {
         browseButton = new javax.swing.JButton();
         connectButton = new javax.swing.JButton();
         disconnectButton = new javax.swing.JButton();
-        list1 = new java.awt.List();
+        listHistory = new java.awt.List();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -162,6 +162,11 @@ public class ClientUI extends javax.swing.JFrame {
         );
 
         selectServerButton.setText("Select Server");
+        selectServerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectServerButtonActionPerformed(evt);
+            }
+        });
 
         settingsLabel.setText("Settings");
 
@@ -193,6 +198,11 @@ public class ClientUI extends javax.swing.JFrame {
             });
 
             connectButton.setText("Connect");
+            connectButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    connectButtonActionPerformed(evt);
+                }
+            });
 
             disconnectButton.setText("Disconnect");
 
@@ -231,7 +241,7 @@ public class ClientUI extends javax.swing.JFrame {
                                     .addComponent(selectServerButton)
                                     .addGap(613, 613, 613)
                                     .addComponent(mainMenuButton))
-                                .addComponent(list1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addComponent(listHistory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                     .addContainerGap(43, Short.MAX_VALUE))
             );
             settingsPanelLayout.setVerticalGroup(
@@ -254,7 +264,7 @@ public class ClientUI extends javax.swing.JFrame {
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                     .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(historyLabel)
-                        .addComponent(list1, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(listHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(selectServerButton)
@@ -357,6 +367,54 @@ public class ClientUI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_buttonDeleteLocalFileActionPerformed
 
+    private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
+
+        // TO DO Connect to server.
+        // Only adds server to list
+        
+        // Merge IP & Port string
+        String server = new StringBuilder(serverIPText.getText()).append(":").append(serverPortText.getText()).toString();
+
+        // Add server to history list 
+        // Loop through list to check if server already exists
+        // if exists, server will not be added.
+        
+        int check = 0;
+
+        if (listHistory.getItemCount() == 0) {
+            listHistory.add(server);
+            System.out.println("Server added: " + server);
+            check++;
+        } else {
+
+            for (int i = 0; i < listHistory.getItemCount(); i++) {
+                if (listHistory.getItem(i).equals(server)) {
+                    check++;
+                    break;
+                }
+            }
+        }
+
+        if (check == 0) {
+            listHistory.add(server);
+            System.out.println("Server added: " + server);
+        }
+
+
+    }//GEN-LAST:event_connectButtonActionPerformed
+
+    private void selectServerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectServerButtonActionPerformed
+
+        String[] ipAndPort = listHistory.getSelectedItem().split(":", 2);
+
+        System.out.println("IP : " + ipAndPort[0]);
+        System.out.println("Port : " + ipAndPort[1]);
+
+        serverIPText.setText(ipAndPort[0]);
+        serverPortText.setText(ipAndPort[1]);
+
+    }//GEN-LAST:event_selectServerButtonActionPerformed
+
     private void getLocalFileList(String location) {
 
         // Get files from local folder. C:\Sharebox\ will be used as default folder. 
@@ -383,7 +441,7 @@ public class ClientUI extends javax.swing.JFrame {
     private javax.swing.JLabel historyLabel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private java.awt.List list1;
+    private java.awt.List listHistory;
     private java.awt.List listLocalFiles;
     private java.awt.List listServerFiles;
     private javax.swing.JLabel localFolderLabel;

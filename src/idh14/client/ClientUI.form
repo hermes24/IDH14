@@ -238,7 +238,7 @@
                                   <EmptySpace min="-2" pref="613" max="-2" attributes="0"/>
                                   <Component id="mainMenuButton" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <Component id="list1" max="32767" attributes="0"/>
+                              <Component id="listHistory" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -268,7 +268,7 @@
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="historyLabel" min="-2" max="-2" attributes="0"/>
-                      <Component id="list1" min="-2" pref="330" max="-2" attributes="0"/>
+                      <Component id="listHistory" min="-2" pref="330" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -285,6 +285,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Select Server"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectServerButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="settingsLabel">
           <Properties>
@@ -342,13 +345,16 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Connect"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="connectButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="disconnectButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="Disconnect"/>
           </Properties>
         </Component>
-        <Component class="java.awt.List" name="list1">
+        <Component class="java.awt.List" name="listHistory">
         </Component>
       </SubComponents>
     </Container>
