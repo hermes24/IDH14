@@ -41,9 +41,9 @@ public class ClientHandler implements Runnable {
 	private final BufferedWriter writer;
 
 	/**
-	 * Folder.
+	 * Server instance.
 	 */
-	private final Folder folder;
+	private final Server server;
 
 	/**
 	 * Thread die deze instantie van een ClientHandler bedient.
@@ -57,12 +57,12 @@ public class ClientHandler implements Runnable {
 	 *            lokale TCP-socket waarlangs de verbinding met de remote client
 	 *            verloopt.
 	 */
-	public ClientHandler(Socket socket, Folder folder) throws IOException {
+	public ClientHandler(Socket socket, Server server) throws IOException {
 		assert (socket.isConnected());
 		this.socket = socket;
 		reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-		this.folder = folder;
+		this.server = server;
 	}
 
 	/**
@@ -106,19 +106,17 @@ public class ClientHandler implements Runnable {
 					
 					// Een LIST-request heeft verder geen data.
 					case LIST:
-						ListResponse lr = new ListResponse(200);
-						File f = new File();
-						f.setFilename("Bladiebla.pdf");
-						f.setChecksum("8578201cf22b83bdaef44e1c5a5dc2e764218aa8");
-						lr.addFile(f);
-						writer.write(lr.toString());
-						writer.flush();
 						break;
 					// Een GET-request bevat de naam van het gewenste bestand.
 					case GET:
 						break;
 					// Een PUT-request bevat de naam van het te plaatsen bestand,
 					// de checksum, de oorspronkelijke checksum en de inhoud.
+					// Bestaat het bestand nog niet, dan wordt het aangemaakt. Bestaat
+					// het al wel, dan wordt de waarde in de meegegeven originele
+					// checksum vergeleken met de huidige checksum-waarde op de
+					// server. Zijn die gelijk, dan mag het bestand worden overschreven.
+					// Zo niet, dan volgt een foutmelding 412.
 					case PUT:
 						break;
 					// Een DELETE-request bevat de naam van het te verwijderen
@@ -129,9 +127,9 @@ public class ClientHandler implements Runnable {
 					}
 				}
 			} catch (IllegalArgumentException iae) {
-				System.err.println("Onbekend request ontvangen op " + this.toString());
+				System.err.println("Onbekende request ontvangen op " + this.toString());
 			} catch (IOException ioe) {
-				System.err.println("Fout bij ontvangen van client op " + this.toString());
+				System.err.println("Fout bij ontvangen bericht van client op " + this.toString());
 			}
 
 		}

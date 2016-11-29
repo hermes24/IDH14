@@ -1,6 +1,7 @@
 package idh14.server;
 
 import java.io.BufferedReader;
+import java.io.File;
 
 // File Sharing
 //
@@ -14,6 +15,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -39,14 +41,14 @@ public class Server implements Runnable {
 	private final Thread thread;
 
 	/**
-	 * Folder.
-	 */
-	private final Folder folder;
-
-	/**
 	 * Lijst van verbonden remote clients.
 	 */
-	private List<ClientHandler> clientHandlers = new ArrayList<>();
+	private final List<ClientHandler> clientHandlers = new ArrayList<>();
+	
+	/**
+	 * Lijst van *.fs-bestanden in de opgegeven bestandsmap.
+	 */
+	private final HashMap<String, FileReference> files = new HashMap<String, FileReference>();
 
 	/**
 	 * Server.
@@ -58,10 +60,20 @@ public class Server implements Runnable {
 	 */
 	public Server(int port, String folderPath) throws IOException {
 		socket = new ServerSocket(port);
-		folder = new Folder(folderPath);
 		thread = new Thread(this);
+		
+		// Scan de opgegeven bestandsmap op zoek naar *.fs-bestanden.
+		File d = new File(folderPath);
+		File[] l = d.listFiles();
+		for (File f : l)
+			files.put(f.getName(), new FileReference(f.getName()));
+		
 	}
-
+	
+	public FileReference getFileReference(String filename) {
+		return files.get(filename);
+	}
+	
 	@Override
 	public void run() {
 		try {
@@ -72,7 +84,7 @@ public class Server implements Runnable {
 			System.out.println("Server wacht op binnenkomende connecties op poort " + socket.getLocalPort() + '.');
 			while (!Thread.currentThread().isInterrupted()) {
 				Socket c = socket.accept();
-				ClientHandler h = new ClientHandler(c, folder);
+				ClientHandler h = new ClientHandler(c, this);
 				h.start();
 				clientHandlers.add(h);
 				System.out.println("TCP-connectie ontvangen: " + h.toString());
@@ -121,7 +133,7 @@ public class Server implements Runnable {
 		// TODO: poortnummer van de command line kunnen ontvangen.
 		// TODO: foldernaam idem
 		try {
-			Server s = new Server(PORT, "/Users/Joost/");
+			Server s = new Server(PORT, "/Users/Joost/Projects/IDH14/FileSharing/files");
 			s.start();
 
 			// Vanaf hier draait de server in zijn eigen thread. De main thread
