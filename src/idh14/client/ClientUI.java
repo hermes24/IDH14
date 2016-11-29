@@ -19,7 +19,7 @@ import javax.swing.JOptionPane;
  */
 public class ClientUI extends javax.swing.JFrame {
 
-    private String location = "C:\\Sharebox\\";
+    private String location = "C:\\";
 
     /**
      * Creates new form ClientUI
@@ -417,8 +417,9 @@ public class ClientUI extends javax.swing.JFrame {
 
     private void getLocalFileList(String location) {
 
-        // Get files from local folder. C:\Sharebox\ will be used as default folder. 
+        // Get files from local folder. C:\ will be used as default folder. 
         // Folder can be changed from settings menu within app.
+        
         File folder = new File(location);
         File[] listOfFiles = folder.listFiles();
         listLocalFiles.clear();
