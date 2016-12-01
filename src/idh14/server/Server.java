@@ -1,7 +1,6 @@
 package idh14.server;
 
 import java.io.BufferedReader;
-import java.io.File;
 
 // File Sharing
 //
@@ -15,7 +14,6 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -28,13 +26,23 @@ public class Server implements Runnable {
 	 * Default port is 54321. Gebruikt indien geen poortnummer is opgegeven in
 	 * de configuratie of via de command line.
 	 */
-	public static final int PORT = 54321;
+	public static final int DEFAULT_PORT = 54321;
+	
+	/**
+	 * Default path is een folder ergens in de boomstructuur van het project.
+	 */
+	public static final String DEFAULT_PATH = "/Users/joost/Documents/Studie/Avans/IDH14/Netwerken/Project/test";
+
+	/**
+	 * Opslag van files (in een directory).
+	 */
+	private final Storage storage;
 
 	/**
 	 * Server socket.
 	 */
 	private final ServerSocket socket;
-
+	
 	/**
 	 * Server thread.
 	 */
@@ -46,11 +54,6 @@ public class Server implements Runnable {
 	private final List<ClientHandler> clientHandlers = new ArrayList<>();
 	
 	/**
-	 * Lijst van *.fs-bestanden in de opgegeven bestandsmap.
-	 */
-	private final HashMap<String, FileReference> files = new HashMap<String, FileReference>();
-
-	/**
 	 * Server.
 	 * 
 	 * @param port
@@ -58,22 +61,20 @@ public class Server implements Runnable {
 	 * @param folderPath
 	 *            te synchroniseren bestandsmap
 	 */
-	public Server(int port, String folderPath) throws IOException {
+	public Server(int port, Storage storage) throws IOException {
+		this.storage = storage;
 		socket = new ServerSocket(port);
 		thread = new Thread(this);
-		
-		// Scan de opgegeven bestandsmap op zoek naar *.fs-bestanden.
-		File d = new File(folderPath);
-		File[] l = d.listFiles();
-		for (File f : l)
-			files.put(f.getName(), new FileReference(f.getName()));
-		
 	}
 	
-	public FileReference getFileReference(String filename) {
-		return files.get(filename);
+	/**
+	 * ClientHandlers moeten bij de opslag van files kunnen.
+	 * @return
+	 */
+	public Storage getStorage() {
+		return storage;
 	}
-	
+		
 	@Override
 	public void run() {
 		try {
@@ -129,11 +130,9 @@ public class Server implements Runnable {
 	 */
 	public static void main(String[] args) {
 
-		// TODO: poortnummer uit configuratie
-		// TODO: poortnummer van de command line kunnen ontvangen.
-		// TODO: foldernaam idem
 		try {
-			Server s = new Server(PORT, "C:\\Sharebox\\");
+			Storage t = new Storage(DEFAULT_PATH);
+			Server s = new Server(DEFAULT_PORT, t);
 			s.start();
 
 			// Vanaf hier draait de server in zijn eigen thread. De main thread

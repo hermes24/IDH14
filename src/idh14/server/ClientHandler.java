@@ -1,23 +1,25 @@
 package idh14.server;
 
+//File Sharing
+//
+//Luc Hermes  |  Eric Marsilje  |  Joost van Stuijvenberg
+//
+//Avans Hogeschool Breda - IDH14
+//November/December 2016
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-
-// File Sharing
-//
-// Luc Hermes  |  Eric Marsilje  |  Joost van Stuijvenberg
-//
-// Avans Hogeschool Breda - IDH14
-// November/December 2016
-
 import java.net.Socket;
+import java.util.ArrayList;
 
-import idh14.protocol.File;
-import idh14.protocol.ListResponse;
-import idh14.protocol.RequestType;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import idh14.protocol.Request;
+import idh14.protocol.Response;
 
 /**
  * Een ClientHandler-instantie bedient één (1) remote client.
@@ -99,31 +101,53 @@ public class ClientHandler implements Runnable {
 			try {
 				String l = reader.readLine();
 				if (!l.isEmpty()) {
+
+					// Bepaal het type request.
 					String r = (l.split(" ", 2))[0];
 					System.out.println("Request: " + r + " ontvangen op " + this.toString());
-					RequestType t = RequestType.valueOf(r);
+					Request.Type t = Request.Type.valueOf(r);
 					switch (t) {
-					
-					// Een LIST-request heeft verder geen data.
+
+					// Een LIST-request heeft verder geen data. Retourneer de
+					// lijst met bestanden en hun checksums.
 					case LIST:
+						Storage s = server.getStorage();
+						JSONObject b = new JSONObject();
+						JSONArray f = new JSONArray();
+						for (String q : s.getFiles()) {
+							JSONObject qq = new JSONObject();
+							qq.put("filename", q);
+							f.put(qq);
+						}
+						b.put("files", f);
+						Response p = new Response(Response.Status.OK, b);
+						writer.write(p.toString());
+						writer.flush();
 						break;
+
 					// Een GET-request bevat de naam van het gewenste bestand.
 					case GET:
 						break;
-					// Een PUT-request bevat de naam van het te plaatsen bestand,
+
+					// Een PUT-request bevat de naam van het te plaatsen
+					// bestand,
 					// de checksum, de oorspronkelijke checksum en de inhoud.
-					// Bestaat het bestand nog niet, dan wordt het aangemaakt. Bestaat
-					// het al wel, dan wordt de waarde in de meegegeven originele
+					// Bestaat het bestand nog niet, dan wordt het aangemaakt.
+					// Bestaat
+					// het al wel, dan wordt de waarde in de meegegeven
+					// originele
 					// checksum vergeleken met de huidige checksum-waarde op de
-					// server. Zijn die gelijk, dan mag het bestand worden overschreven.
+					// server. Zijn die gelijk, dan mag het bestand worden
+					// overschreven.
 					// Zo niet, dan volgt een foutmelding 412.
 					case PUT:
 						break;
+
 					// Een DELETE-request bevat de naam van het te verwijderen
 					// bestand en de checksum.
 					case DELETE:
 						break;
-						
+
 					}
 				}
 			} catch (IllegalArgumentException iae) {

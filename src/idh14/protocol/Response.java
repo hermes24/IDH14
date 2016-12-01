@@ -1,6 +1,19 @@
 package idh14.protocol;
 
-public abstract class Response {
+import org.json.JSONObject;
+
+public class Response {
+
+	public enum Status {
+		OK(200), GEEN_IDEE(400), NOT_FOUND(404), CONFLICT(412);
+		
+		@SuppressWarnings("unused")
+		private final int code;
+
+		Status(int code) {
+			this.code = code;
+		}
+	}
 
 	public static final String ID = "RESPONSE";
 
@@ -9,13 +22,16 @@ public abstract class Response {
 	public static final String VERSION = "1.0";
 
 	public static final String LF = "\n";
-	
-	public static final int STATUS_OK = 200;
 
 	/**
 	 * Status code.
 	 */
-	private final int status;
+	private final Status status;
+	
+	/**
+	 * Inhoud van de response.
+	 */
+	private final JSONObject body;
 
 	/**
 	 * Request.
@@ -25,13 +41,9 @@ public abstract class Response {
 	 * @param body
 	 *            inhoud
 	 */
-	protected Response(int status) {
+	public Response(Status status, JSONObject body) {
 		this.status = status;
-	}
-
-	@Override
-	public String toString() {
-		return ID + ' ' + PROTOCOL + '/' + VERSION + LF + LF;
+		this.body = body;
 	}
 
 	/**
@@ -39,8 +51,22 @@ public abstract class Response {
 	 * 
 	 * @return status
 	 */
-	public int getStatus() {
+	public Status getStatus() {
 		return status;
 	}
+	
+	/**
+	 * Getter voor de body.
+	 */
+	public JSONObject getBody() {
+		return body;
+	}
 
+	@Override
+	public String toString() {
+		String result = ID + ' ' + PROTOCOL + '/' + VERSION + LF;
+		result += body;
+		result += LF;
+		return result;
+	}
 }
