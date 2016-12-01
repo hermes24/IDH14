@@ -1,7 +1,10 @@
 package idh14.client;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -399,6 +402,8 @@ public class ClientUI extends javax.swing.JFrame {
             listHistory.add(server);
             System.out.println("Server added: " + server);
         }
+        
+        connectToServer();
 
 
     }//GEN-LAST:event_connectButtonActionPerformed
@@ -428,6 +433,24 @@ public class ClientUI extends javax.swing.JFrame {
             listLocalFiles.add(listOfFiles[i].getName());
         }
     }
+    
+    private void connectToServer(){
+        try{
+            Socket s = new Socket(serverIPText.getText(), Integer.parseInt(serverPortText.getText()));
+        BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
+        while (!input.ready()) {}
+         System.out.println(input.readLine()); // Read one line and output it
+
+         System.out.print("'\n");
+         input.close();
+        System.exit(0);
+        }catch(Exception e) {
+         System.out.print("Dat ging fout ! ");
+            
+        }
+        
+    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton browseButton;

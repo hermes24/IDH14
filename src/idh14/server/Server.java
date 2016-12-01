@@ -133,7 +133,7 @@ public class Server implements Runnable {
 		// TODO: poortnummer van de command line kunnen ontvangen.
 		// TODO: foldernaam idem
 		try {
-			Server s = new Server(PORT, "/Users/Joost/Projects/IDH14/FileSharing/files");
+			Server s = new Server(PORT, "C:\\Sharebox\\");
 			s.start();
 
 			// Vanaf hier draait de server in zijn eigen thread. De main thread
