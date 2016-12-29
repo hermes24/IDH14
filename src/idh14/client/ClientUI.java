@@ -1,9 +1,7 @@
 package idh14.client;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
@@ -23,6 +21,10 @@ import javax.swing.JOptionPane;
 public class ClientUI extends javax.swing.JFrame {
 
     private String location = "C:\\";
+    private ServerHandler server;
+    private String serverAddress;
+    private int serverPort;
+    private ServerHandler serverHandler;
 
     /**
      * Creates new form ClientUI
@@ -31,7 +33,7 @@ public class ClientUI extends javax.swing.JFrame {
         initComponents();
         settingsPanel.setVisible(false);
         getLocalFileList(location);
-
+        
     }
 
     /**
@@ -96,6 +98,11 @@ public class ClientUI extends javax.swing.JFrame {
         });
 
         buttonUpdateServerList.setText("Update List");
+        buttonUpdateServerList.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonUpdateServerListActionPerformed(evt);
+            }
+        });
 
         buttonDownloadServerFile.setText("Download");
 
@@ -189,9 +196,9 @@ public class ClientUI extends javax.swing.JFrame {
         localFolderText.setEditable(false);
         localFolderText.setText("C:\\");
 
-            serverIPText.setText("192.168.178.11");
+            serverIPText.setText("127.0.0.1");
 
-            serverPortText.setText("8080");
+            serverPortText.setText("54321");
 
             browseButton.setText("Browse");
             browseButton.addActionListener(new java.awt.event.ActionListener() {
@@ -208,6 +215,11 @@ public class ClientUI extends javax.swing.JFrame {
             });
 
             disconnectButton.setText("Disconnect");
+            disconnectButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    disconnectButtonActionPerformed(evt);
+                }
+            });
 
             javax.swing.GroupLayout settingsPanelLayout = new javax.swing.GroupLayout(settingsPanel);
             settingsPanel.setLayout(settingsPanelLayout);
@@ -377,6 +389,9 @@ public class ClientUI extends javax.swing.JFrame {
         
         // Merge IP & Port string
         String server = new StringBuilder(serverIPText.getText()).append(":").append(serverPortText.getText()).toString();
+        
+        serverAddress = serverIPText.getText();
+        serverPort =  Integer.parseInt(serverPortText.getText());
 
         // Add server to history list 
         // Loop through list to check if server already exists
@@ -417,8 +432,16 @@ public class ClientUI extends javax.swing.JFrame {
 
         serverIPText.setText(ipAndPort[0]);
         serverPortText.setText(ipAndPort[1]);
-
+        
     }//GEN-LAST:event_selectServerButtonActionPerformed
+
+    private void buttonUpdateServerListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUpdateServerListActionPerformed
+        serverHandler.getServerFileList();
+    }//GEN-LAST:event_buttonUpdateServerListActionPerformed
+
+    private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed
+        serverHandler.stop(true);
+    }//GEN-LAST:event_disconnectButtonActionPerformed
 
     private void getLocalFileList(String location) {
 
@@ -434,21 +457,20 @@ public class ClientUI extends javax.swing.JFrame {
         }
     }
     
-    private void connectToServer(){
-        try{
-            Socket s = new Socket(serverIPText.getText(), Integer.parseInt(serverPortText.getText()));
-        BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        while (!input.ready()) {}
-         System.out.println(input.readLine()); // Read one line and output it
+    private void connectToServer() {
 
-         System.out.print("'\n");
-         input.close();
-        System.exit(0);
-        }catch(Exception e) {
-         System.out.print("Dat ging fout ! ");
-            
+        //server = new ServerHandler(serverAddress,serverPort);
+        //server.start();
+        try {
+            Socket c = new Socket(serverAddress,serverPort);
+            serverHandler = new ServerHandler(c, this);
+            serverHandler.start();
+
+        } catch (Exception e) {
+            System.err.println("Fout opgetreden in clientui thread: " + e.getMessage());
+            e.printStackTrace();
+
         }
-        
     }
     
 

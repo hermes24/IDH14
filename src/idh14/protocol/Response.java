@@ -1,5 +1,6 @@
 package idh14.protocol;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
@@ -66,5 +67,19 @@ public class Response {
 		writer.write(body.toString(4) + LF);
 		writer.flush();
 	}
+        
+        public static Response unMarshallResponse(BufferedReader reader) throws IOException {
+
+        // even snelle methode gemaakt om te testen of output werkt. 
+        // verdere implementatie moet nog ingevuld worden.
+            
+        Response result;
+        JSONObject b = new JSONObject();
+        result = new Response(b);
+        
+        System.out.println("unmarshall method in response .. " + reader.readLine().toString());
+        return result;
+
+    }
 
 }

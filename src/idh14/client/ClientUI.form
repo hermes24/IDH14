@@ -165,6 +165,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Update List"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonUpdateServerListActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="buttonDownloadServerFile">
           <Properties>
@@ -325,12 +328,12 @@
         </Component>
         <Component class="javax.swing.JTextField" name="serverIPText">
           <Properties>
-            <Property name="text" type="java.lang.String" value="192.168.178.11"/>
+            <Property name="text" type="java.lang.String" value="127.0.0.1"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="serverPortText">
           <Properties>
-            <Property name="text" type="java.lang.String" value="8080"/>
+            <Property name="text" type="java.lang.String" value="54321"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="browseButton">
@@ -353,6 +356,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Disconnect"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="disconnectButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="java.awt.List" name="listHistory">
         </Component>
