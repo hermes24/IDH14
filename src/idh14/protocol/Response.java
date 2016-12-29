@@ -1,5 +1,8 @@
 package idh14.protocol;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+
 import org.json.JSONObject;
 
 public class Response {
@@ -7,11 +10,14 @@ public class Response {
 	public enum Status {
 		OK(200), GEEN_IDEE(400), NOT_FOUND(404), CONFLICT(412);
 		
-		@SuppressWarnings("unused")
 		private final int code;
 
 		Status(int code) {
 			this.code = code;
+		}
+		
+		public int getCode() {
+			return code;
 		}
 	}
 
@@ -22,11 +28,6 @@ public class Response {
 	public static final String VERSION = "1.0";
 
 	public static final String LF = "\n";
-
-	/**
-	 * Status code.
-	 */
-	private final Status status;
 	
 	/**
 	 * Inhoud van de response.
@@ -41,18 +42,8 @@ public class Response {
 	 * @param body
 	 *            inhoud
 	 */
-	public Response(Status status, JSONObject body) {
-		this.status = status;
+	public Response(JSONObject body) {
 		this.body = body;
-	}
-
-	/**
-	 * Getter voor status.
-	 * 
-	 * @return status
-	 */
-	public Status getStatus() {
-		return status;
 	}
 	
 	/**
@@ -69,4 +60,11 @@ public class Response {
 		result += LF;
 		return result;
 	}
+	
+	public void marshall(BufferedWriter writer) throws IOException {		
+		writer.write(ID + ' ' + PROTOCOL + '/' + VERSION + LF + LF);
+		writer.write(body.toString(4) + LF);
+		writer.flush();
+	}
+
 }

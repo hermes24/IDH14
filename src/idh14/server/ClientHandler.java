@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.ArrayList;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import idh14.protocol.Request;
@@ -74,7 +72,7 @@ public class ClientHandler implements Runnable {
 		assert (runner == null);
 		runner = new Thread(this);
 		runner.start();
-		System.out.println(this.toString() + " is gestart.");
+		System.out.println("Client handler voor " + toString() + " is gestart.");
 	}
 
 	/**
@@ -90,7 +88,27 @@ public class ClientHandler implements Runnable {
 		if (block)
 			while (!runner.isInterrupted())
 				;
-		System.out.println(this.toString() + " is gestopt.");
+		System.out.println("Client handler voor " + toString() + " is gestopt.");
+	}
+
+	/**
+	 * Handle LIST-request.
+	 */
+	private void handleListRequest() throws IOException {
+		Storage s = server.getStorage();
+		JSONObject b = new JSONObject();
+		b.put("status", Response.Status.OK.getCode());
+
+		if (!s.getFileWrappers().isEmpty())
+			for (FileWrapper w : s.getFileWrappers()) {
+				JSONObject o = new JSONObject();
+				o.put("filename", w.getFile().getName());
+				o.put("checksum", w.getChecksum());
+				b.append("files", o);
+			}
+
+		Response p = new Response(b);
+		p.marshall(writer);
 	}
 
 	/**
@@ -99,69 +117,36 @@ public class ClientHandler implements Runnable {
 	public void run() {
 		while (!runner.isInterrupted()) {
 			try {
-				String l = reader.readLine();
-				if (!l.isEmpty()) {
-
-					// Bepaal het type request.
-					String r = (l.split(" ", 2))[0];
-					System.out.println("Request: " + r + " ontvangen op " + this.toString());
-					Request.Type t = Request.Type.valueOf(r);
-					switch (t) {
-
-					// Een LIST-request heeft verder geen data. Retourneer de
-					// lijst met bestanden en hun checksums.
+				Request r = Request.unMarshallRequest(reader);
+				if (r == null) {
+					System.out.println("Client op " + this.toString()
+							+ " heeft verbinding verbroken. Client handler wordt gestopt.");
+					stop(true);
+				} else {
+					System.out.println(r.getType() + "-request ontvangen op " + this.toString());
+					switch (r.getType()) {
 					case LIST:
-						Storage s = server.getStorage();
-						JSONObject b = new JSONObject();
-						JSONArray f = new JSONArray();
-						for (String q : s.getFiles()) {
-							JSONObject qq = new JSONObject();
-							qq.put("filename", q);
-							f.put(qq);
-						}
-						b.put("files", f);
-						Response p = new Response(Response.Status.OK, b);
-						writer.write(p.toString());
-						writer.flush();
+						handleListRequest();
 						break;
-
-					// Een GET-request bevat de naam van het gewenste bestand.
 					case GET:
 						break;
-
-					// Een PUT-request bevat de naam van het te plaatsen
-					// bestand,
-					// de checksum, de oorspronkelijke checksum en de inhoud.
-					// Bestaat het bestand nog niet, dan wordt het aangemaakt.
-					// Bestaat
-					// het al wel, dan wordt de waarde in de meegegeven
-					// originele
-					// checksum vergeleken met de huidige checksum-waarde op de
-					// server. Zijn die gelijk, dan mag het bestand worden
-					// overschreven.
-					// Zo niet, dan volgt een foutmelding 412.
 					case PUT:
 						break;
-
-					// Een DELETE-request bevat de naam van het te verwijderen
-					// bestand en de checksum.
 					case DELETE:
 						break;
-
 					}
 				}
-			} catch (IllegalArgumentException iae) {
-				System.err.println("Onbekende request ontvangen op " + this.toString());
 			} catch (IOException ioe) {
-				System.err.println("Fout bij ontvangen bericht van client op " + this.toString());
+				System.err.println(
+						"Fout bij ontvangen bericht van client op " + this.toString() + ". Fout: " + ioe.getMessage());
+				stop(true);
 			}
-
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "Remote IP-adres/poort " + socket.getRemoteSocketAddress() + '/' + socket.getPort()
+		return "remote IP-adres/poort " + socket.getRemoteSocketAddress() + '/' + socket.getPort()
 				+ " naar lokale poort " + socket.getLocalPort();
 	}
 

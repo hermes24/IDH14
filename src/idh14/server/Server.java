@@ -20,18 +20,18 @@ import java.util.List;
  * De Server-klasse bevat de serverapplicatie voor het file sharing protocol.
  */
 public class Server implements Runnable {
-	// TODO: Log4J
+
+	// TODO: Log4J i.p.v. System.out en System.err.
+	/**
+	 * Default path is een folder ergens in de boomstructuur van het project.
+	 */
+	public static final String DEFAULT_PATH = "/Users/joost/Projects/IDH14/test";
 
 	/**
 	 * Default port is 54321. Gebruikt indien geen poortnummer is opgegeven in
 	 * de configuratie of via de command line.
 	 */
 	public static final int DEFAULT_PORT = 54321;
-	
-	/**
-	 * Default path is een folder ergens in de boomstructuur van het project.
-	 */
-	public static final String DEFAULT_PATH = "/Users/joost/Documents/Studie/Avans/IDH14/Netwerken/Project/test";
 
 	/**
 	 * Opslag van files (in een directory).
@@ -42,7 +42,7 @@ public class Server implements Runnable {
 	 * Server socket.
 	 */
 	private final ServerSocket socket;
-	
+
 	/**
 	 * Server thread.
 	 */
@@ -52,7 +52,7 @@ public class Server implements Runnable {
 	 * Lijst van verbonden remote clients.
 	 */
 	private final List<ClientHandler> clientHandlers = new ArrayList<>();
-	
+
 	/**
 	 * Server.
 	 * 
@@ -66,15 +66,16 @@ public class Server implements Runnable {
 		socket = new ServerSocket(port);
 		thread = new Thread(this);
 	}
-	
+
 	/**
 	 * ClientHandlers moeten bij de opslag van files kunnen.
+	 * 
 	 * @return
 	 */
 	public Storage getStorage() {
 		return storage;
 	}
-		
+
 	@Override
 	public void run() {
 		try {
@@ -121,7 +122,7 @@ public class Server implements Runnable {
 		System.out.println("Alle client handlers zijn gestopt.");
 		thread.interrupt();
 	}
-	
+
 	/**
 	 * Entry point van de serverapplicatie.
 	 * 
@@ -131,12 +132,28 @@ public class Server implements Runnable {
 	public static void main(String[] args) {
 
 		try {
-			Storage t = new Storage(DEFAULT_PATH);
-			Server s = new Server(DEFAULT_PORT, t);
+
+			// Eventuele 1e parameter is het poortnummer.
+			int p = DEFAULT_PORT;
+			if (args.length > 0) {
+				System.out.println(args[0]);
+				p = Integer.valueOf(args[0]);
+			}
+
+			// Eventuele 2e parameter is de directorynaam.
+			String d = DEFAULT_PATH;
+			if (args.length > 1) {
+				System.out.println(args[1]);
+				d = args[1];
+			}
+
+			Storage t = new Storage(d);
+			Server s = new Server(p, t);
 			s.start();
 
 			// Vanaf hier draait de server in zijn eigen thread. De main thread
-			// gebruiken we om een minimalistische beheer-interface mee te faciliteren.
+			// gebruiken we om een minimalistische beheer-interface mee te
+			// faciliteren.
 			String c;
 			do {
 				BufferedReader b = new BufferedReader(new InputStreamReader(System.in));
@@ -151,16 +168,17 @@ public class Server implements Runnable {
 					break;
 				case "i":
 				case "I":
-					// TODO: nog iets nuttigs implementeren. Overzicht gebruikt geheugen of
-					// iets degelijks.
+					System.out.println("Server draait voor directory " + s.getStorage().getDirectory());
 					break;
 				}
 			} while (!c.equalsIgnoreCase("q"));
 			s.stop();
-			System.exit(0);
-		} catch (IOException ioe) {
-			System.err.println("Fout opgetreden bij aanmaken van de server-instantie: " + ioe.getMessage());
-			ioe.printStackTrace();
+		} catch (Exception e) {
+
+			// Alle mogelijk opgetreden fouten zijn reden om de serverapplicatie
+			// te beëindigen.
+			System.err.println("Fout opgetreden bij aanmaken van de server-instantie: " + e.getMessage());
+			e.printStackTrace();
 		}
 
 	}
