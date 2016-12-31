@@ -25,7 +25,7 @@ public class Server implements Runnable {
 	/**
 	 * Default path is een folder ergens in de boomstructuur van het project.
 	 */
-	public static final String DEFAULT_PATH = "/Users/joost/Projects/IDH14/test";
+	public static final String DEFAULT_PATH = "/Users/joost/Projects/test";
 
 	/**
 	 * Default port is 54321. Gebruikt indien geen poortnummer is opgegeven in

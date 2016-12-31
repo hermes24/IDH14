@@ -9,11 +9,15 @@ package idh14.server;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import idh14.protocol.Request;
@@ -107,8 +111,52 @@ public class ClientHandler implements Runnable {
 				b.append("files", o);
 			}
 
-		Response p = new Response(b);
-		p.marshall(writer);
+		new Response(b).marshall(writer);
+	}
+
+	/**
+	 * Handle GET-request.
+	 */
+	private void handleGetRequest(Request request) throws IOException {
+		Storage s = server.getStorage();
+		JSONObject b = new JSONObject();
+		String filename = null;
+		try {
+			filename = request.getBody().getString("filename");
+		} catch (JSONException je) {
+			b.put("status", Response.Status.GEEN_IDEE.getCode());
+			new Response(b).marshall(writer);
+			return;
+		}
+
+		FileWrapper f = null;
+		for (FileWrapper w : s.getFileWrappers())
+			if (w.getFile().getName().equals(filename)) {
+				f = w;
+				break;
+			}
+		if (f == null) {
+			b.put("status", Response.Status.NOT_FOUND.getCode());
+			new Response(b).marshall(writer);
+			return;
+		}
+		
+		b.put("status", Response.Status.OK.getCode());
+		b.put("filename", f.getFile().getName());
+		b.put("checksum", f.getChecksum());
+		
+		// En nu nog de inhoud.
+		Encoder e = Base64.getEncoder();
+		FileInputStream fis = new FileInputStream(f.getFile());
+		StringBuffer sb = new StringBuffer();
+		byte[] buffer = new byte[1024];
+		while (fis.read(buffer) != -1) {
+			sb.append(e.encodeToString(buffer));
+		}
+		fis.close();
+		b.put("content", sb.toString());
+		
+		new Response(b).marshall(writer);
 	}
 
 	/**
@@ -129,6 +177,7 @@ public class ClientHandler implements Runnable {
 						handleListRequest();
 						break;
 					case GET:
+						handleGetRequest(r);
 						break;
 					case PUT:
 						break;

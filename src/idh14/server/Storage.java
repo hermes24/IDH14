@@ -33,7 +33,7 @@ public class Storage {
 		ArrayList<FileWrapper> result = new ArrayList<FileWrapper>();
 		File d = new File(directory);
 		File[] l = d.listFiles();
-		// TODO: volgens mij crasht e.e.a. als de dir leeg is. Even testen?
+		// TODO: Crasht als de dir leeg is of niet bestaat (nog uitzoeken).
 		for (File f : l) {
 			FileWrapper w = new FileWrapper(f, messageDigest);
 			w.calculateChecksum();

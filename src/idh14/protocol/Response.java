@@ -117,7 +117,6 @@ public class Response {
             // Lees de (lege) JSON request body.
             JSONTokener tokener = new JSONTokener(reader);
             result.body = (JSONObject) tokener.nextValue();
-            System.out.println(result.toString());
 
         } catch (Exception e) {
             throw new IOException("Data error while reading from socket: " + e.getMessage());

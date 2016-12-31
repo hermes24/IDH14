@@ -1,5 +1,6 @@
 package idh14.client;
 
+import idh14.protocol.Response;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -10,6 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * File Sharing
@@ -435,7 +438,20 @@ public class ClientUI extends javax.swing.JFrame {
     }//GEN-LAST:event_selectServerButtonActionPerformed
 
     private void buttonUpdateServerListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUpdateServerListActionPerformed
-        serverHandler.getServerFileList();
+        
+        listServerFiles.clear();
+        Response r = serverHandler.getServerFileList();
+        
+        JSONArray list = new JSONArray();
+        list = r.getBody().getJSONArray("files");
+
+        for (int i = 0; i < list.length(); i++) {
+            System.out.println(list.getJSONObject(i).toString());
+            JSONObject o = list.getJSONObject(i);
+            listServerFiles.add(o.getString("filename"));
+        }
+    
+        
     }//GEN-LAST:event_buttonUpdateServerListActionPerformed
 
     private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed

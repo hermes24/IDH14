@@ -6,7 +6,6 @@ package idh14.client;
 //
 //Avans Hogeschool Breda - IDH14
 //November/December 2016
-
 import idh14.protocol.Request;
 import idh14.protocol.Response;
 import java.io.BufferedReader;
@@ -63,17 +62,20 @@ public class ServerHandler implements Runnable {
         System.out.println("Server handler voor " + toString() + " is gestopt.");
     }
 
-    public void getServerFileList() {
-
+    public Response getServerFileList() {
+        
+        JSONObject empty = new JSONObject();
+        Response response = new Response(empty);
         active = true;
 
         while (active) {
-            JSONObject b = new JSONObject();
+            // Bouwen request met type LIST
             Request.Type type = Request.Type.LIST;
-            Request r = new Request(type, b);
+            Request r = new Request(type, empty);
             String request = r.toString();
 
             try {
+                // Send request naar server
                 writer.write(request);
                 writer.flush();
                 active = false;
@@ -84,16 +86,21 @@ public class ServerHandler implements Runnable {
             }
 
             try {
-                JSONObject b2 = new JSONObject();
-                Response rs = new Response(b2);
-                rs.unMarshallResponse(reader);
+                // Verwerk response ontvangen van server    
+                response = new Response(empty).unMarshallResponse(reader);
+                
 
             } catch (IOException e) {
                 System.err.println(e.getMessage());
                 stop(true);
             }
-
         }
-    }
+            
 
+        return response;
+    
+    
+    }
 }
+
+
