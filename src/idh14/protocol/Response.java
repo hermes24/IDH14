@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 public class Response {
 
@@ -33,7 +34,11 @@ public class Response {
 	/**
 	 * Inhoud van de response.
 	 */
-	private final JSONObject body;
+	private JSONObject body;
+        
+        private String protocol;
+
+        private String version;
 
 	/**
 	 * Request.
@@ -74,11 +79,53 @@ public class Response {
         // verdere implementatie moet nog ingevuld worden.
             
         Response result;
-        JSONObject b = new JSONObject();
-        result = new Response(b);
-        
-        System.out.println("unmarshall method in response .. " + reader.readLine().toString());
+
+        try {
+            // Lees door tot er ofwel een niet-lege regel is gelezen of dat het eind van de stream
+            // is bereikt (client heeft verbinding verbroken).
+            String l = "";
+            do {
+                l = reader.readLine();
+                if (l == null) {
+                    return null;
+                }
+            } while (l.trim().equals(""));
+
+            // We nemen aan dat de regel die nu gelezen gaat worden de protocol header is.
+            String[] s = l.split(" ", 2);
+
+            // Maak leeg response object.
+            JSONObject b = new JSONObject();
+            result = new Response(b);
+            
+            // Bepaal het protocol en het versienummer + vul object met strings uit buffer
+            String[] p = s[1].split("/");
+            result.protocol = p[0];
+            System.out.println("Protocol van response is: " + result.protocol);
+            if (!result.protocol.equals(PROTOCOL)) {
+                throw new IOException("Invalid protocol " + result.protocol + " specified.");
+            }
+            result.version = p[1];
+            System.out.println("Version van response is: " + result.version);
+            if (!result.version.equals(VERSION)) {
+                throw new IOException("Invalid version " + result.version + " specified.");
+            }
+
+            // Lees de lege regel na de protocol header.
+            reader.readLine();
+
+            // Lees de (lege) JSON request body.
+            JSONTokener tokener = new JSONTokener(reader);
+            result.body = (JSONObject) tokener.nextValue();
+            System.out.println(result.toString());
+
+        } catch (Exception e) {
+            throw new IOException("Data error while reading from socket: " + e.getMessage());
+        }
+
         return result;
+        
+        
 
     }
 

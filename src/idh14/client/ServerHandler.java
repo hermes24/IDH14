@@ -1,9 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package idh14.client;
+
+//File Sharing
+//
+//Luc Hermes  |  Eric Marsilje  |  Joost van Stuijvenberg
+//
+//Avans Hogeschool Breda - IDH14
+//November/December 2016
 
 import idh14.protocol.Request;
 import idh14.protocol.Response;
@@ -63,7 +65,6 @@ public class ServerHandler implements Runnable {
 
     public void getServerFileList() {
 
-        System.out.println("Button pressed");
         active = true;
 
         while (active) {
@@ -74,7 +75,6 @@ public class ServerHandler implements Runnable {
 
             try {
                 writer.write(request);
-                System.out.println(request);
                 writer.flush();
                 active = false;
 

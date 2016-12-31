@@ -375,7 +375,6 @@ public class ClientUI extends javax.swing.JFrame {
             } catch (IOException x) {
                 // File permission problems are caught here.
                 System.err.println(x);
-
             }
 
         }
