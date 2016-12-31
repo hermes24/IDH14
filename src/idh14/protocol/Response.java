@@ -74,10 +74,7 @@ public class Response {
 	}
         
         public static Response unMarshallResponse(BufferedReader reader) throws IOException {
-
-        // even snelle methode gemaakt om te testen of output werkt. 
-        // verdere implementatie moet nog ingevuld worden.
-            
+         
         Response result;
 
         try {
@@ -117,6 +114,7 @@ public class Response {
             // Lees de (lege) JSON request body.
             JSONTokener tokener = new JSONTokener(reader);
             result.body = (JSONObject) tokener.nextValue();
+            System.out.println("Print vanuit unmarshall method in ResponseKlasse om response weer te geven " + LF + result.toString());
 
         } catch (Exception e) {
             throw new IOException("Data error while reading from socket: " + e.getMessage());

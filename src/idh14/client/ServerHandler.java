@@ -10,6 +10,8 @@ import idh14.protocol.Request;
 import idh14.protocol.Response;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -63,7 +65,7 @@ public class ServerHandler implements Runnable {
     }
 
     public Response getServerFileList() {
-        
+
         JSONObject empty = new JSONObject();
         Response response = new Response(empty);
         active = true;
@@ -72,11 +74,10 @@ public class ServerHandler implements Runnable {
             // Bouwen request met type LIST
             Request.Type type = Request.Type.LIST;
             Request r = new Request(type, empty);
-            String request = r.toString();
 
             try {
                 // Send request naar server
-                writer.write(request);
+                writer.write(r.toString());
                 writer.flush();
                 active = false;
 
@@ -88,19 +89,62 @@ public class ServerHandler implements Runnable {
             try {
                 // Verwerk response ontvangen van server    
                 response = new Response(empty).unMarshallResponse(reader);
-                
 
             } catch (IOException e) {
                 System.err.println(e.getMessage());
                 stop(true);
             }
         }
-            
 
         return response;
-    
-    
+
+    }
+
+    public void getFileFromServer(String request,String location) throws IOException {
+
+        // TO DO: deels zelfde code als getFileList. 
+        // Moet nieuwe functie voor komen om duplicatie te voorkomen
+        
+        JSONObject empty = new JSONObject();
+        Response response = new Response(empty);
+        active = true;
+        while (active) {
+
+            try {
+                // Send request naar server
+                writer.write(request);
+                writer.flush();
+                active = false;
+                System.out.println(request);
+
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+                stop(true);
+            }
+
+            try {
+                // Verwerk response ontvangen van server    
+                response = new Response(empty).unMarshallResponse(reader);
+
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+                stop(true);
+            }
+
+            // Nieuwe file lokaal aanmaken
+            BufferedWriter output = null;
+            try {
+                File file = new File(location + response.getBody().get("filename").toString());
+                output = new BufferedWriter(new FileWriter(file));
+                output.write("hello");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (output != null) {
+                    output.close();
+
+                }
+            }
+        }
     }
 }
-
-

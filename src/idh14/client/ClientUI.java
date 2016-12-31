@@ -1,5 +1,6 @@
 package idh14.client;
 
+import idh14.protocol.Request;
 import idh14.protocol.Response;
 import java.io.File;
 import java.io.IOException;
@@ -9,9 +10,12 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -23,7 +27,7 @@ import org.json.JSONObject;
  */
 public class ClientUI extends javax.swing.JFrame {
 
-    private String location = "C:\\";
+    private String location = "C:\\Sharebox2\\";
     private ServerHandler server;
     private String serverAddress;
     private int serverPort;
@@ -36,7 +40,7 @@ public class ClientUI extends javax.swing.JFrame {
         initComponents();
         settingsPanel.setVisible(false);
         getLocalFileList(location);
-        
+
     }
 
     /**
@@ -108,6 +112,11 @@ public class ClientUI extends javax.swing.JFrame {
         });
 
         buttonDownloadServerFile.setText("Download");
+        buttonDownloadServerFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonDownloadServerFileActionPerformed(evt);
+            }
+        });
 
         buttonDeleteServerFile.setText("Delete");
 
@@ -360,8 +369,8 @@ public class ClientUI extends javax.swing.JFrame {
 
     private void buttonDeleteLocalFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteLocalFileActionPerformed
 
-        // Remove selected file in locallist
-        // When no file selected, user receives a error message
+        // Verwijderen geselecteerde file in lokale folder
+        // Als er geen file geselecteerd is krijgt de gebruiker een melding.
         if (listLocalFiles.getSelectedIndex() == -1) {
             JOptionPane.showMessageDialog(null, "Please select a local file");
         } else {
@@ -386,19 +395,15 @@ public class ClientUI extends javax.swing.JFrame {
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
 
-        // TO DO Connect to server.
-        // Only adds server to list
-        
-        // Merge IP & Port string
+        // Server toevoegen aan history 
+        // Eerst controleren of server er al in staat, zoja dan niet toevoegen
+        // Server + Poort aan elkaar plakken zodat het mooi in het overzicht staat
         String server = new StringBuilder(serverIPText.getText()).append(":").append(serverPortText.getText()).toString();
-        
-        serverAddress = serverIPText.getText();
-        serverPort =  Integer.parseInt(serverPortText.getText());
 
-        // Add server to history list 
-        // Loop through list to check if server already exists
-        // if exists, server will not be added.
-        
+        serverAddress = serverIPText.getText();
+        serverPort = Integer.parseInt(serverPortText.getText());
+
+        // Nu toevoegen
         int check = 0;
 
         if (listHistory.getItemCount() == 0) {
@@ -419,7 +424,8 @@ public class ClientUI extends javax.swing.JFrame {
             listHistory.add(server);
             System.out.println("Server added: " + server);
         }
-        
+
+        // Vervolgens connecten naar server 
         connectToServer();
 
 
@@ -427,6 +433,7 @@ public class ClientUI extends javax.swing.JFrame {
 
     private void selectServerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectServerButtonActionPerformed
 
+        // Server uit history lijst selecteren 
         String[] ipAndPort = listHistory.getSelectedItem().split(":", 2);
 
         System.out.println("IP : " + ipAndPort[0]);
@@ -434,14 +441,18 @@ public class ClientUI extends javax.swing.JFrame {
 
         serverIPText.setText(ipAndPort[0]);
         serverPortText.setText(ipAndPort[1]);
-        
+
     }//GEN-LAST:event_selectServerButtonActionPerformed
 
     private void buttonUpdateServerListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUpdateServerListActionPerformed
-        
+
+        // Huidige lijst leegmaken 
         listServerFiles.clear();
+
+        // Response ophalen via handler
         Response r = serverHandler.getServerFileList();
-        
+
+        // Response verwerken naar lijst met files 
         JSONArray list = new JSONArray();
         list = r.getBody().getJSONArray("files");
 
@@ -450,19 +461,44 @@ public class ClientUI extends javax.swing.JFrame {
             JSONObject o = list.getJSONObject(i);
             listServerFiles.add(o.getString("filename"));
         }
-    
-        
+
+
     }//GEN-LAST:event_buttonUpdateServerListActionPerformed
 
     private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed
         serverHandler.stop(true);
     }//GEN-LAST:event_disconnectButtonActionPerformed
 
+    private void buttonDownloadServerFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDownloadServerFileActionPerformed
+
+        // Geen file geselecteerd is melding        
+        if (listServerFiles.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(null, "Please select a file");
+        } else {
+            // File geselecteerd dan proberen op te halen
+            try {
+                JSONObject o = new JSONObject();
+                Request.Type type = Request.Type.GET;
+
+                o.put("filename", listServerFiles.getSelectedItem());
+                Request r = new Request(type, o);
+                String request = r.toString();
+                serverHandler.getFileFromServer(request, location);
+                buttonUpdateLocalListActionPerformed(evt);
+
+            } catch (JSONException je) {
+                System.out.println(je.getMessage());
+            } catch (IOException ex) {
+                Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+    }//GEN-LAST:event_buttonDownloadServerFileActionPerformed
+
     private void getLocalFileList(String location) {
 
         // Get files from local folder. C:\ will be used as default folder. 
         // Folder can be changed from settings menu within app.
-        
         File folder = new File(location);
         File[] listOfFiles = folder.listFiles();
         listLocalFiles.clear();
@@ -471,13 +507,12 @@ public class ClientUI extends javax.swing.JFrame {
             listLocalFiles.add(listOfFiles[i].getName());
         }
     }
-    
+
     private void connectToServer() {
 
-        //server = new ServerHandler(serverAddress,serverPort);
-        //server.start();
+        // Connecten naar server
         try {
-            Socket c = new Socket(serverAddress,serverPort);
+            Socket c = new Socket(serverAddress, serverPort);
             serverHandler = new ServerHandler(c, this);
             serverHandler.start();
 
@@ -487,7 +522,7 @@ public class ClientUI extends javax.swing.JFrame {
 
         }
     }
-    
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton browseButton;
