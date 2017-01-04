@@ -10,12 +10,12 @@ import idh14.protocol.Request;
 import idh14.protocol.Response;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Base64;
 import org.json.JSONObject;
 
 /**
@@ -100,11 +100,10 @@ public class ServerHandler implements Runnable {
 
     }
 
-    public void getFileFromServer(String request,String location) throws IOException {
+    public void getFileFromServer(String request, String location) throws IOException {
 
         // TO DO: deels zelfde code als getFileList. 
         // Moet nieuwe functie voor komen om duplicatie te voorkomen
-        
         JSONObject empty = new JSONObject();
         Response response = new Response(empty);
         active = true;
@@ -132,16 +131,20 @@ public class ServerHandler implements Runnable {
             }
 
             // Nieuwe file lokaal aanmaken
-            BufferedWriter output = null;
+            FileOutputStream fis = null;
+
             try {
-                File file = new File(location + response.getBody().get("filename").toString());
-                output = new BufferedWriter(new FileWriter(file));
-                output.write("hello");
+                // Decode inhoud 
+                Base64.Decoder e = Base64.getDecoder();
+                fis = new FileOutputStream(location + response.getBody().get("filename").toString());
+                byte[] buffer = e.decode(response.getBody().get("content").toString().getBytes("utf-8"));
+                fis.write(buffer);
+
             } catch (IOException e) {
-                e.printStackTrace();
+                e.getMessage();
             } finally {
-                if (output != null) {
-                    output.close();
+                if (fis != null) {
+                    fis.close();
 
                 }
             }

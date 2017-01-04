@@ -27,7 +27,7 @@ import org.json.JSONObject;
  */
 public class ClientUI extends javax.swing.JFrame {
 
-    private String location = "C:\\Sharebox2\\";
+    private String location = "C:\\server\\";
     private ServerHandler server;
     private String serverAddress;
     private int serverPort;
