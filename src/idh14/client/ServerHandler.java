@@ -136,8 +136,10 @@ public class ServerHandler implements Runnable {
             try {
                 // Decode inhoud 
                 Base64.Decoder e = Base64.getDecoder();
+                
+                // File name moet nog naar Base64 
                 fis = new FileOutputStream(location + response.getBody().get("filename").toString());
-                byte[] buffer = e.decode(response.getBody().get("content").toString().getBytes("utf-8"));
+                byte[] buffer = e.decode(response.getBody().get("content").toString());
                 fis.write(buffer);
 
             } catch (IOException e) {

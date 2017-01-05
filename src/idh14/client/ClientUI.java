@@ -27,7 +27,7 @@ import org.json.JSONObject;
  */
 public class ClientUI extends javax.swing.JFrame {
 
-    private String location = "C:\\server\\";
+    private String location = "C:\\client\\";
     private ServerHandler server;
     private String serverAddress;
     private int serverPort;
