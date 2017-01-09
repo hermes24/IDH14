@@ -1,6 +1,7 @@
 package idh14.server;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -41,7 +42,29 @@ public class Storage {
 		}
 		return result;
 	}
+	
+	public boolean fileExists(String filename) throws IOException {
+		File f = new File(directory + File.separator + filename);
+		return f.exists() && f.isFile();
+	}
+	
+	public FileWrapper getFileWrapper(String filename) throws IOException {
+		File f = new File(directory + File.separator + filename);
+		FileWrapper w = new FileWrapper(f, messageDigest);
+		w.calculateChecksum();
+		return w;
+	}
 
+	public FileOutputStream getOutputStream(String filename) throws IOException {
+		return new FileOutputStream(directory + File.separator + filename);
+	}
+	
+	public void deleteFile(String filename) throws IOException {
+		File f = new File(directory + File.separator + filename);
+		//f.delete();
+		System.out.println("Aargh!! Bestand is weg! (maar niet heus)");
+	}
+	
 	public String getDirectory() {
 		return directory;
 	}
