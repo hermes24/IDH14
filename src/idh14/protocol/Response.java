@@ -98,12 +98,10 @@ public class Response {
             // Bepaal het protocol en het versienummer + vul object met strings uit buffer
             String[] p = s[1].split("/");
             result.protocol = p[0];
-            System.out.println("Protocol van response is: " + result.protocol);
             if (!result.protocol.equals(PROTOCOL)) {
                 throw new IOException("Invalid protocol " + result.protocol + " specified.");
             }
             result.version = p[1];
-            System.out.println("Version van response is: " + result.version);
             if (!result.version.equals(VERSION)) {
                 throw new IOException("Invalid version " + result.version + " specified.");
             }
@@ -114,7 +112,6 @@ public class Response {
             // Lees de (lege) JSON request body.
             JSONTokener tokener = new JSONTokener(reader);
             result.body = (JSONObject) tokener.nextValue();
-            System.out.println("Print vanuit unmarshall method in ResponseKlasse om response weer te geven " + LF + result.toString());
 
         } catch (Exception e) {
             throw new IOException("Data error while reading from socket: " + e.getMessage());

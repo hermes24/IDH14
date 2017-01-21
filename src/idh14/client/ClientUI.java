@@ -457,7 +457,6 @@ public class ClientUI extends javax.swing.JFrame {
         list = r.getBody().getJSONArray("files");
 
         for (int i = 0; i < list.length(); i++) {
-            System.out.println(list.getJSONObject(i).toString());
             JSONObject o = list.getJSONObject(i);
             listServerFiles.add(o.getString("filename"));
         }

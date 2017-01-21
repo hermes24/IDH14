@@ -131,22 +131,22 @@ public class ServerHandler implements Runnable {
             }
 
             // Nieuwe file lokaal aanmaken
-            FileOutputStream fis = null;
+            FileOutputStream fos = null;
 
             try {
                 // Decode inhoud 
                 Base64.Decoder e = Base64.getDecoder();
                 
                 // File name moet nog naar Base64 
-                fis = new FileOutputStream(location + response.getBody().get("filename").toString());
+                fos = new FileOutputStream(location + response.getBody().get("filename").toString());
                 byte[] buffer = e.decode(response.getBody().get("content").toString());
-                fis.write(buffer);
+                fos.write(buffer);
 
             } catch (IOException e) {
                 e.getMessage();
             } finally {
-                if (fis != null) {
-                    fis.close();
+                if (fos != null) {
+                    fos.close();
 
                 }
             }
