@@ -27,11 +27,11 @@ import org.json.JSONObject;
  */
 public class ClientUI extends javax.swing.JFrame {
 
-    private String location = "C:\\client\\";
-    private ServerHandler server;
+    private DiskHandler diskHandler;
     private String serverAddress;
     private int serverPort;
     private ServerHandler serverHandler;
+    private String location = "C:\\client\\";
 
     /**
      * Creates new form ClientUI
@@ -95,7 +95,12 @@ public class ClientUI extends javax.swing.JFrame {
             }
         });
 
-        buttonUploadLocalFile.setText("Upload");
+        buttonUploadLocalFile.setText("Put");
+        buttonUploadLocalFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonUploadLocalFileActionPerformed(evt);
+            }
+        });
 
         buttonDeleteLocalFile.setText("Delete");
         buttonDeleteLocalFile.addActionListener(new java.awt.event.ActionListener() {
@@ -111,7 +116,7 @@ public class ClientUI extends javax.swing.JFrame {
             }
         });
 
-        buttonDownloadServerFile.setText("Download");
+        buttonDownloadServerFile.setText("Get");
         buttonDownloadServerFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonDownloadServerFileActionPerformed(evt);
@@ -364,7 +369,6 @@ public class ClientUI extends javax.swing.JFrame {
 
     private void buttonUpdateLocalListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUpdateLocalListActionPerformed
         getLocalFileList(location);
-        System.out.println("File list refreshed, current folder: " + location);
     }//GEN-LAST:event_buttonUpdateLocalListActionPerformed
 
     private void buttonDeleteLocalFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteLocalFileActionPerformed
@@ -446,19 +450,23 @@ public class ClientUI extends javax.swing.JFrame {
 
     private void buttonUpdateServerListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUpdateServerListActionPerformed
 
-        // Huidige lijst leegmaken 
-        listServerFiles.clear();
+        if (serverHandler == null) {
+            JOptionPane.showMessageDialog(null, "Please connect to server first");
+        } else {
+            // Huidige lijst leegmaken 
+            listServerFiles.clear();
 
-        // Response ophalen via handler
-        Response r = serverHandler.getServerFileList();
+            // Response ophalen via handler
+            Response r = serverHandler.getServerFileList();
 
-        // Response verwerken naar lijst met files 
-        JSONArray list = new JSONArray();
-        list = r.getBody().getJSONArray("files");
+            // Response verwerken naar lijst met files 
+            JSONArray list = new JSONArray();
+            list = r.getBody().getJSONArray("files");
 
-        for (int i = 0; i < list.length(); i++) {
-            JSONObject o = list.getJSONObject(i);
-            listServerFiles.add(o.getString("filename"));
+            for (int i = 0; i < list.length(); i++) {
+                JSONObject o = list.getJSONObject(i);
+                listServerFiles.add(o.getString("filename"));
+            }
         }
 
 
@@ -489,10 +497,34 @@ public class ClientUI extends javax.swing.JFrame {
                 System.out.println(je.getMessage());
             } catch (IOException ex) {
                 Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         }
     }//GEN-LAST:event_buttonDownloadServerFileActionPerformed
+
+    private void buttonUploadLocalFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUploadLocalFileActionPerformed
+
+        // Geen file geselecteerd is melding        
+        if (listLocalFiles.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(null, "Please select a file");
+        } else {
+            // File geselecteerd dan proberen te verzenden
+            try {
+
+                serverHandler.putFileToServer(listLocalFiles.getSelectedItem());
+                buttonUpdateServerListActionPerformed(evt);
+
+            } catch (JSONException je) {
+                System.out.println(je.getMessage());
+            } catch (IOException ex) {
+                Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+
+    }//GEN-LAST:event_buttonUploadLocalFileActionPerformed
 
     private void getLocalFileList(String location) {
 

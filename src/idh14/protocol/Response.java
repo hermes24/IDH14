@@ -10,7 +10,7 @@ import org.json.JSONTokener;
 public class Response {
 
 	public enum Status {
-		OK(200), GEEN_IDEE(400), NOT_FOUND(404), CONFLICT(412);
+		OK(200), GEEN_IDEE(400), NOT_FOUND(404), CONFLICT(412), ERROR(500);
 		
 		private final int code;
 

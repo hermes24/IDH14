@@ -21,11 +21,10 @@ import java.util.List;
  */
 public class Server implements Runnable {
 
-	// TODO: Log4J i.p.v. System.out en System.err.
 	/**
 	 * Default path is een folder ergens in de boomstructuur van het project.
 	 */
-	public static final String DEFAULT_PATH = "C:\\server\\";
+	public static final String DEFAULT_PATH = "/Users/joost/Projects/test";
 
 	/**
 	 * Default port is 54321. Gebruikt indien geen poortnummer is opgegeven in
