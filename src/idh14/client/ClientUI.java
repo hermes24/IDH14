@@ -4,12 +4,14 @@ import idh14.protocol.Request;
 import idh14.protocol.Response;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -465,7 +467,8 @@ public class ClientUI extends javax.swing.JFrame {
 
             for (int i = 0; i < list.length(); i++) {
                 JSONObject o = list.getJSONObject(i);
-                listServerFiles.add(o.getString("filename"));
+                
+                listServerFiles.add(Base64Decoded(o.getString("filename")));
             }
         }
 
@@ -487,7 +490,7 @@ public class ClientUI extends javax.swing.JFrame {
                 JSONObject o = new JSONObject();
                 Request.Type type = Request.Type.GET;
 
-                o.put("filename", listServerFiles.getSelectedItem());
+                o.put("filename", Base64Encoded(listServerFiles.getSelectedItem()));
                 Request r = new Request(type, o);
                 String request = r.toString();
                 serverHandler.getFileFromServer(request, location);
@@ -553,6 +556,28 @@ public class ClientUI extends javax.swing.JFrame {
 
         }
     }
+    
+    	/**
+	 * Utility method voor codering naar Base64.
+	 */
+	private static final String Base64Encoded(String source) {
+		String result = null;
+		try {
+			byte[] b = source.getBytes("UTF-8");
+			result = new String(Base64.getEncoder().encode(b));
+		} catch (UnsupportedEncodingException uce) {
+			result = "Encoding to Base64 failed.";
+		}
+		return result;
+	}
+
+	/**
+	 * Utility method voor decodering uit Base64.
+	 */
+
+	private static final String Base64Decoded(String source) {
+		return new String(Base64.getDecoder().decode(source));
+	}
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

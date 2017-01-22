@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -50,7 +51,7 @@ public class ServerHandler implements Runnable {
         admini = new ChecksumManagement(managementLocation);
         this.diskHandler = new DiskHandler(location);
         this.clientui = clientui;
-        admini.load();
+        //admini.load();
 
     }
 
@@ -149,7 +150,8 @@ public class ServerHandler implements Runnable {
                 Base64.Decoder e = Base64.getDecoder();
 
                 // File name moet nog naar Base64 
-                String filename = response.getBody().get("filename").toString();
+                String filename64 = response.getBody().get("filename").toString();
+                String filename = Base64Decoded(filename64);
                 String content = response.getBody().get("content").toString();
                 String checksumInResponse = response.getBody().get("checksum").toString();
                 
@@ -243,5 +245,13 @@ public class ServerHandler implements Runnable {
         is.close();
         return bytes;
     }
+    
+	/**
+	 * Utility method voor decodering uit Base64.
+	 */
+
+	private static final String Base64Decoded(String source) {
+		return new String(Base64.getDecoder().decode(source));
+	}
 
 }

@@ -18,10 +18,13 @@ public class ChecksumManagement {
     private String absolutePath;
     private ArrayList<NewFileHandler> fileList;
 
-    public ChecksumManagement(String absolutePath) throws FileNotFoundException, IOException, EOFException {
+    public ChecksumManagement(String absolutePath) throws FileNotFoundException, IOException, EOFException, ClassNotFoundException {
         this.absolutePath = absolutePath;
-        reader = new BufferedReader(new FileReader(absolutePath));
         fileList = new ArrayList<>();
+        load();
+        reader = new BufferedReader(new FileReader(absolutePath));
+        
+        
     }
 
     public void load() throws IOException, ClassNotFoundException {
@@ -32,6 +35,10 @@ public class ChecksumManagement {
         try {
             File f = new File(absolutePath);
             long length = f.length();
+            boolean exists = f.exists();
+            if(!exists){
+                f.createNewFile();
+            }
             if (length > 1) {
                 FileInputStream fis = new FileInputStream(absolutePath);
                 ObjectInputStream ois = new ObjectInputStream(fis);
