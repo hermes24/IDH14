@@ -5,19 +5,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 
-public class LocalFileHandler {
+public class LocalFileWrapper {
 
     public static final int EOF = -1;
-
     private final File file;
-
     private final MessageDigest messageDigest;
-
     private String checksum;
     private String originalChecksum;
 
     // TODO: historie van checksums in een ArrayList o.i.d.
-    public LocalFileHandler(File file, MessageDigest messageDigest) {
+    public LocalFileWrapper(File file, MessageDigest messageDigest) {
         this.file = file;
         this.messageDigest = messageDigest;
     }    
@@ -49,6 +46,7 @@ public class LocalFileHandler {
     }
 
     public String getOriginalChecksum() {
+        
         originalChecksum = "xxxxxx"; 
         return originalChecksum;
     }

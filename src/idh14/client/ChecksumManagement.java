@@ -18,7 +18,7 @@ public final class ChecksumManagement {
 
     public ChecksumManagement(String absolutePath, DiskHandler diskHandler) throws FileNotFoundException, IOException, EOFException, ClassNotFoundException {
         this.absolutePath = absolutePath;
-        fileList = new ArrayList<>();
+        fileList = new ArrayList<NewFileHandler>();
         load();
         this.diskHandler = diskHandler;
     }
@@ -54,7 +54,7 @@ public final class ChecksumManagement {
         }
     }
 
-    public boolean addOrUpdate(NewFileHandler fileFromServer) throws FileNotFoundException, IOException, ClassNotFoundException {
+    public boolean addOrUpdate(NewFileHandler fileFromServer, String function) throws FileNotFoundException, IOException, ClassNotFoundException {
 
         File f = new File(absolutePath);
         long length = f.length();
@@ -63,7 +63,7 @@ public final class ChecksumManagement {
         boolean message = false;
         boolean writePermitted = true;
         NewFileHandler arrayFile = null;
-        LocalFileHandler local = null;
+        LocalFileWrapper local = null;
 
         if (length < 10) {
 
@@ -102,15 +102,22 @@ public final class ChecksumManagement {
                 if (tempFile.getFileName().equals(fileFromServer.getFileName())) {
                     add = false;
                     arrayFile = tempFile;
-                    
-                    local = diskHandler.getFileHandler(tempFile.getFileName());
-                    if(local.getChecksum().equals(arrayFile.getOriginalChecksum())){
-                        System.out.println("LOKAAL & ARRAY = ZELFDE .. lokaal updaten toegestaan.");
+
+                    local = diskHandler.getFileWrapper(tempFile.getFileName());
+                    if (local.getChecksum().equals(arrayFile.getOriginalChecksum())) {
+
+                        System.out.println("LOKAAL & ARRAY = ZELFDE  -- > lokaal updaten toegestaan.");
                         update = true;
                         message = false;
+                        
                     } else {
                         System.out.println("LOKAAL & ARRAY = AFWIJKEND .. USER interactie gewenst");
                         message = true;
+                    }
+                    if(function == "put"){
+                        System.out.println("PUT functie --> checksum update !");
+                        update = true;
+                        message = false;
                     }
                 }
             }
@@ -127,18 +134,15 @@ public final class ChecksumManagement {
             }
 
             while (update) {
-                System.out.println("UPDATE LOOP");
-                System.out.println("FILE-EXISTS = TRUE // Filename in list : " + arrayFile.getFileName() + " Filename in opgehaalde file : " + fileFromServer.getFileName());
+
                 if (!arrayFile.getOriginalChecksum().equals(fileFromServer.getOriginalChecksum())) {
-                    // HIER MOET NOG DE VERGELIJKING NAAR CHECKSOMLOKAAL BIJ 
-                    // hier moet ergens een while true loop anders gaat hij ook over de andere elementen loopen.
-                    System.out.println("Checksum van lokale file is anders dus file lokaal bijwerken");
+                    System.out.println("SERVER FILE = nieuwer .. UPDATE LOKAAL");
                     fileList.remove(arrayFile);
                     fileList.add(fileFromServer);
+
                 } else {
-                     System.out.println("FILE-EXISTS = TRUE // Maar lokale en serverfile checksum komen overeen, dus doe NIETS");
+                    System.out.println("FILE-EXISTS = TRUE // Maar lokale en serverfile checksum komen overeen, dus doe NIETS");
                 }
-               
 
                 FileOutputStream fos2 = new FileOutputStream(absolutePath);
                 ObjectOutputStream oos2 = new ObjectOutputStream(fos2);
@@ -147,20 +151,55 @@ public final class ChecksumManagement {
                 update = false;
 
             }
-            
+
             while (message) {
                 System.out.println("Message to user ?");
                 message = false;
                 writePermitted = false;
             }
-            
-                FileOutputStream fos2 = new FileOutputStream(absolutePath);
-                ObjectOutputStream oos2 = new ObjectOutputStream(fos2);
-                oos2.writeObject(fileList);
-                oos2.close();
 
-    }
+            FileOutputStream fos2 = new FileOutputStream(absolutePath);
+            ObjectOutputStream oos2 = new ObjectOutputStream(fos2);
+            oos2.writeObject(fileList);
+            oos2.close();
+
+        }
 
         return writePermitted;
-}
+    }
+    
+    public String getOriginalChecksumFromFile(String filename) throws FileNotFoundException, IOException, ClassNotFoundException {
+
+        File f = new File(absolutePath);
+        long length = f.length();
+
+        if (length < 10) {
+
+            System.out.println("FILE-LENGTH < 10 // Voegen we eerst een lege array aan de file toe");
+            // Eerst iets aanmaken anders krijgen we een NULLpointer op de objectinputstream
+            FileOutputStream fos = new FileOutputStream(absolutePath);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(fileList);
+            oos.close();
+        }
+        
+        
+        FileInputStream fis = new FileInputStream(absolutePath);
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        ArrayList<NewFileHandler> fileList = (ArrayList<NewFileHandler>) ois.readObject();
+        String originalChecksum = null;
+        
+        for (NewFileHandler arrayFile : fileList) {
+            if(arrayFile.getFileName().equals(filename)){
+                originalChecksum = arrayFile.getOriginalChecksum();
+                            System.out.println("Filename : " + arrayFile.getFileName());
+            System.out.println("Org - checksum : " + arrayFile.getOriginalChecksum());
+            }
+
+            
+        }
+        
+        return originalChecksum;
+    }
+    
 }

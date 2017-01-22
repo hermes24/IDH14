@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -458,18 +459,13 @@ public class ClientUI extends javax.swing.JFrame {
             // Huidige lijst leegmaken 
             listServerFiles.clear();
 
-            // Response ophalen via handler
-            Response r = serverHandler.getServerFileList();
-
-            // Response verwerken naar lijst met files 
-            JSONArray list = new JSONArray();
-            list = r.getBody().getJSONArray("files");
-
-            for (int i = 0; i < list.length(); i++) {
-                JSONObject o = list.getJSONObject(i);
-                
-                listServerFiles.add(Base64Decoded(o.getString("filename")));
+            // Lijst met files ophalen vanuit server
+            ArrayList<String> r = serverHandler.getServerFileList();
+            
+            for (String s : r) {
+                listServerFiles.add(s);
             }
+
         }
 
 
@@ -487,14 +483,18 @@ public class ClientUI extends javax.swing.JFrame {
         } else {
             // File geselecteerd dan proberen op te halen
             try {
-                JSONObject o = new JSONObject();
-                Request.Type type = Request.Type.GET;
-
-                o.put("filename", Base64Encoded(listServerFiles.getSelectedItem()));
-                Request r = new Request(type, o);
-                String request = r.toString();
-                serverHandler.getFileFromServer(request, location);
+                
+                serverHandler.getFileFromServer(listServerFiles.getSelectedItem());
                 buttonUpdateLocalListActionPerformed(evt);
+                
+//                JSONObject o = new JSONObject();
+//                Request.Type type = Request.Type.GET;
+//
+//                o.put("filename", Base64Encoded(listServerFiles.getSelectedItem()));
+//                Request r = new Request(type, o);
+//                String request = r.toString();
+//                serverHandler.getFileFromServer(request, location);
+//                buttonUpdateLocalListActionPerformed(evt);
 
             } catch (JSONException je) {
                 System.out.println(je.getMessage());

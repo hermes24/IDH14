@@ -12,7 +12,6 @@ public class DiskHandler {
 	 * De uiteindelijke naam van de folder.
 	 */
 	private final String directory;
-	
 	private final MessageDigest messageDigest;
 
 	public DiskHandler(String directory) throws IOException, NoSuchAlgorithmException {
@@ -21,10 +20,11 @@ public class DiskHandler {
 		this.messageDigest = MessageDigest.getInstance("SHA-1");
 	}
 
-	public LocalFileHandler getFileHandler(String filename) throws IOException {
+	public LocalFileWrapper getFileWrapper(String filename) throws IOException {
 		File f = new File(directory + File.separator + filename);
-		LocalFileHandler fileHandler = new LocalFileHandler(f, messageDigest);
+		LocalFileWrapper fileHandler = new LocalFileWrapper(f, messageDigest);
 		fileHandler.calculateChecksum();
+                fileHandler.getOriginalChecksum();
 		return fileHandler;
 	}
 
