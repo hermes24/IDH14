@@ -48,11 +48,10 @@ public class ServerHandler implements Runnable {
         this.socket = socket;
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-        admini = new ChecksumManagement(managementLocation);
         this.diskHandler = new DiskHandler(location);
-        this.clientui = clientui;
-        //admini.load();
+        admini = new ChecksumManagement(managementLocation, diskHandler);
 
+        this.clientui = clientui;
     }
 
     public void run() {
@@ -158,21 +157,16 @@ public class ServerHandler implements Runnable {
                 //  NewFileHandler aanmaken zodat ik object heb
                 NewFileHandler fah = new NewFileHandler(filename, checksumInResponse);
                 
-                // filename niet aanwezig = Opslaan.
-                if (admini.fileExistsInList(fah) == false) {
-                    admini.addObjectFile(fah);
-                    System.out.println("add,, omdat dit de eerste versie van " + fah.getFileName());
-                } else {
-                    // filename wel aanwezig, dan controle op checksum. Dan gaan we toveren.                   
-                    System.out.println("update, omdat we deze al kennen");
-                    LocalFileHandler f = diskHandler.getFileHandler(filename);
-                    String checksumLocalFile = f.getChecksum();
-                    admini.updateFile(fah,checksumLocalFile,checksumInResponse);
-                }
+                // Administratie bijwerken 
+                if (admini.addOrUpdate(fah)) {
 
-                fos = new FileOutputStream(location + filename);
-                byte[] buffer = e.decode(content);
-                fos.write(buffer);
+                    // Klopt adminstratie niet doordat een lokale file afwijkend van server
+                    // En er is user interactie vereist. Dan mogen we lokaal niet schrijven.
+                    
+                    fos = new FileOutputStream(location + filename);
+                    byte[] buffer = e.decode(content);
+                    fos.write(buffer);
+                }
 
             } catch (IOException e) {
                 e.getMessage();
