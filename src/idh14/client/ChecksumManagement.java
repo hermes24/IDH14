@@ -62,6 +62,7 @@ public final class ChecksumManagement {
         boolean update = false;
         boolean message = false;
         boolean writePermitted = true;
+        boolean checksumIntegrityCompromised = false;
         NewFileHandler arrayFile = null;
         LocalFileWrapper local = null;
 
@@ -95,6 +96,15 @@ public final class ChecksumManagement {
             ObjectInputStream ois = new ObjectInputStream(fis);
             ArrayList<NewFileHandler> fileList = (ArrayList<NewFileHandler>) ois.readObject();
             System.out.println("Aantal objecten in arraylist :" + fileList.size());
+            System.out.println("Aantal files in client folder :" + diskHandler.getChecksumIntegrity());
+            
+            if(fileList.size() != diskHandler.getChecksumIntegrity()){
+                checksumIntegrityCompromised = true;
+                
+                // Nog iets bouwen dat ik checksum history bijwerk als er ook maar iets gebeurt.
+                // Door bijvoorbeeld onverwacht lokaal verwijderen, etc ..
+            }
+            
 
             for (NewFileHandler tempFile : fileList) {
 

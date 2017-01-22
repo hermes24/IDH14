@@ -67,7 +67,7 @@ public class ServerHandler implements Runnable {
         runner = new Thread(this);
         runner.start();
         System.out.println("Server handler is gestart.");
-        clientui.setMessageBoxText("Server handler is gestart.");
+        clientui.setMessageBoxText("Verbonden met Server " + socket.getInetAddress() + " @ poort :" + socket.getPort());
     }
 
     public void stop(boolean block) {
@@ -78,7 +78,7 @@ public class ServerHandler implements Runnable {
             while (!runner.isInterrupted());
         }
         System.out.println("Server handler is gestopt.");
-        clientui.setMessageBoxText("Server handler is gestopt.");
+        clientui.setMessageBoxText("Verbinding met Server verbroken");
     }
 
     public ArrayList<String> getServerFileList() {

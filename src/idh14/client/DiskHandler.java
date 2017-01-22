@@ -2,6 +2,8 @@ package idh14.client;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -27,6 +29,11 @@ public class DiskHandler {
                 fileHandler.getOriginalChecksum();
 		return fileHandler;
 	}
+        
+        public long getChecksumIntegrity() throws IOException{
+            long numberOfFiles = Files.list(Paths.get(this.directory)).count();
+            return numberOfFiles;
+        }
 
 	public void deleteFile(String filename) throws IOException {
 		File f = new File(directory + File.separator + filename);
