@@ -20,12 +20,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
-import static java.nio.file.Files.list;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
-import static java.util.Collections.list;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -70,6 +67,7 @@ public class ServerHandler implements Runnable {
         runner = new Thread(this);
         runner.start();
         System.out.println("Server handler is gestart.");
+        clientui.setMessageBoxText("Server handler is gestart.");
     }
 
     public void stop(boolean block) {
@@ -80,10 +78,11 @@ public class ServerHandler implements Runnable {
             while (!runner.isInterrupted());
         }
         System.out.println("Server handler is gestopt.");
+        clientui.setMessageBoxText("Server handler is gestopt.");
     }
 
     public ArrayList<String> getServerFileList() {
-        
+
         ArrayList<String> listServerFiles = new ArrayList<String>();
 
         JSONObject empty = new JSONObject();
@@ -109,16 +108,17 @@ public class ServerHandler implements Runnable {
             try {
                 // Verwerk response ontvangen van server    
                 response = new Response(empty).unMarshallResponse(reader);
+                
+                clientui.setMessageBoxText("File list opgehaald, Status : " + response.getBody().get("status"));
+                
                 JSONArray list = new JSONArray();
                 list = response.getBody().getJSONArray("files");
 
-            for (int i = 0; i < list.length(); i++) {
-                JSONObject o = list.getJSONObject(i);
-                
-                listServerFiles.add(Base64Decoded(o.getString("filename")));
-            }
-                
-                
+                for (int i = 0; i < list.length(); i++) {
+                    JSONObject o = list.getJSONObject(i);
+
+                    listServerFiles.add(Base64Decoded(o.getString("filename")));
+                }
 
             } catch (IOException e) {
                 System.err.println(e.getMessage());
@@ -131,7 +131,7 @@ public class ServerHandler implements Runnable {
     }
 
     public void getFileFromServer(String file) throws IOException, ClassNotFoundException {
-        
+
         JSONObject empty = new JSONObject();
         Response response = new Response(empty);
         active = true;
@@ -139,6 +139,7 @@ public class ServerHandler implements Runnable {
 
             try {
 
+                // Request bouwen
                 JSONObject o = new JSONObject();
                 Request.Type type = Request.Type.GET;
 
@@ -146,11 +147,11 @@ public class ServerHandler implements Runnable {
                 Request r = new Request(type, o);
                 String request = r.toString();
 
-                // Send request naar server
+                // Request versturen
                 writer.write(request);
                 writer.flush();
                 active = false;
-                System.out.println("GET-Request verstuurd naar Server");
+                clientui.setMessageBoxText("GET-Request verstuurd naar Server");
 
             } catch (IOException e) {
                 System.err.println(e.getMessage());
@@ -160,7 +161,7 @@ public class ServerHandler implements Runnable {
             try {
                 // Verwerk response ontvangen van server    
                 response = new Response(empty).unMarshallResponse(reader);
-                System.out.println("Response ontvangen : Status " + response.getBody().get("status"));
+                clientui.setMessageBoxText("GET-Response : Status " + response.getBody().get("status"));
 
             } catch (IOException e) {
                 System.err.println(e.getMessage());
@@ -174,25 +175,33 @@ public class ServerHandler implements Runnable {
                 // Decode inhoud 
                 Base64.Decoder e = Base64.getDecoder();
 
-                // File name moet nog naar Base64 
+                // Velden uit response extraheren zodat ik hier verdere acties mee kan uitvoeren.
                 String filename64 = response.getBody().get("filename").toString();
                 String filename = Base64Decoded(filename64);
                 String content = response.getBody().get("content").toString();
                 String checksumInResponse = response.getBody().get("checksum").toString();
-                
-                //  NewFileHandler aanmaken zodat ik object heb
-                NewFileHandler fah = new NewFileHandler(filename, checksumInResponse);
-                System.out.println("checksum vanuit server voor deze file : " + checksumInResponse);
-                
-                // Administratie bijwerken 
-                if (admini.addOrUpdate(fah,"get")) {
 
-                    // Klopt adminstratie niet doordat een lokale file afwijkend van server
+                //  NewFileHandler aanmaken. Met dit object voer ik het checksum management.
+                NewFileHandler fah = new NewFileHandler(filename, checksumInResponse);
+
+                // Administratie bijwerken op basis van zojuist aangemaakte object.
+                
+                if (admini.addOrUpdate(fah, "get")) {
+                    
+                    clientui.setMessageBoxText("GET-Response - Checksum administratie bijgewerkt");
+                    // Admin geeft TRUE of FALSE terug.
+                    // Klopt adminstratie niet doordat een lokale file afwijkend is van server
                     // En er is user interactie vereist. Dan mogen we lokaal niet schrijven.
                     
                     fos = new FileOutputStream(location + filename);
                     byte[] buffer = e.decode(content);
                     fos.write(buffer);
+                    
+                } else {
+                    
+                    // False is User om interactie vragen.
+                    clientui.clientPopUpMessage("Fout - Lokaal bijwerken niet mogelijk ivm versie verschillen");
+                    clientui.setMessageBoxText("GET-Response - Administratie niet bijgewerkt ivm Error");
                 }
 
             } catch (IOException e) {
@@ -208,15 +217,14 @@ public class ServerHandler implements Runnable {
 
     public void putFileToServer(String selectedItem) throws IOException, FileNotFoundException, ClassNotFoundException {
 
+        // Aanmaken benodigdheden om request te vullen.
         JSONObject o = new JSONObject();
-
         LocalFileWrapper f = diskHandler.getFileWrapper(selectedItem);
 
+        // JSON object vullen met juiste velden.
         o.put("filename", Base64Encoded(selectedItem));
         o.put("checksum", f.getChecksum());
-        System.out.println("Filename waar ik checksum van ga opvragen : " + selectedItem);
         o.put("original_checksum", admini.getOriginalChecksumFromFile(selectedItem));
-
 
         // En nu nog de inhoud.
         File file = new File(f.getFile().getPath());
@@ -224,27 +232,31 @@ public class ServerHandler implements Runnable {
         byte[] encoded = Base64.getEncoder().encode(bytes);
         String encodedString = new String(encoded);
         o.put("content", encodedString);
-        System.out.println(o.toString());
 
+        // Dit alles nu omtoveren naar request en versturen naar Server.
         Request r = new Request(Request.Type.PUT, o);
         String request = r.toString();
         writer.write(request);
         writer.flush();
-        System.out.println("PUT-Request verstuurd naar Server");
+        clientui.setMessageBoxText("PUT-Request verstuurd naar Server");
 
         try {
-            // Verwerk response ontvangen van server  
+            // Verwerk het response vanuit de Server
             JSONObject empty = new JSONObject();
             Response response = new Response(empty);
             response = new Response(empty).unMarshallResponse(reader);
-            System.out.println("Response ontvangen : Status " + response.getBody().get("status"));
-            
-            if(!response.getBody().get("status").toString().contains("412")){
+
+            // Afhankelijk van de status moet administratie worden bijgewerkt. 
+            // Als file op de server is bijgewerkt, dan moet de client de original_checksum bijwerken in de administratie.
+            if (!response.getBody().get("status").toString().contains("412")) {
                 NewFileHandler fah = new NewFileHandler(selectedItem, f.getChecksum());
-                System.out.println("Gaan file updaten aan server kant ,, dan ook lokaal checksum bijwerken.");
-                admini.addOrUpdate(fah,"put");
+                clientui.setMessageBoxText("PUT-Response - Server heeft file geaccepteerd " + "\n" + "Administatie lokaal bijwerken.");
+                if(admini.addOrUpdate(fah, "put")){
+                    clientui.setMessageBoxText("PUT-Response - Administratie bijgewerkt !");
+                }
             } else {
-                System.out.println("Server geeft foutcode terug. Checksum niet bijwerkt in administratie");
+                clientui.setMessageBoxText("PUT-Response - Server geeft foutcode terug" + "\n" + "Checksum niet bijwerkt in administratie !");
+                clientui.clientPopUpMessage("Fout - File updaten aan serverkant niet mogelijk ivm versie verschillen");
             }
 
         } catch (IOException e) {
@@ -277,27 +289,26 @@ public class ServerHandler implements Runnable {
         is.close();
         return bytes;
     }
-    
-	/**
-	 * Utility method voor decodering uit Base64.
-	 */
 
-	private static final String Base64Decoded(String source) {
-		return new String(Base64.getDecoder().decode(source));
-	}
-        
-            	/**
-	 * Utility method voor codering naar Base64.
-	 */
-	private static final String Base64Encoded(String source) {
-		String result = null;
-		try {
-			byte[] b = source.getBytes("UTF-8");
-			result = new String(Base64.getEncoder().encode(b));
-		} catch (UnsupportedEncodingException uce) {
-			result = "Encoding to Base64 failed.";
-		}
-		return result;
-	}
+    /**
+     * Utility method voor decodering uit Base64.
+     */
+    private static final String Base64Decoded(String source) {
+        return new String(Base64.getDecoder().decode(source));
+    }
+
+    /**
+     * Utility method voor codering naar Base64.
+     */
+    private static final String Base64Encoded(String source) {
+        String result = null;
+        try {
+            byte[] b = source.getBytes("UTF-8");
+            result = new String(Base64.getEncoder().encode(b));
+        } catch (UnsupportedEncodingException uce) {
+            result = "Encoding to Base64 failed.";
+        }
+        return result;
+    }
 
 }

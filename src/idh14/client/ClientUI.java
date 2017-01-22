@@ -3,6 +3,7 @@ package idh14.client;
 import idh14.protocol.Request;
 import idh14.protocol.Response;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
@@ -67,6 +68,9 @@ public class ClientUI extends javax.swing.JFrame {
         buttonDeleteServerFile = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        messageBox = new javax.swing.JScrollPane();
+        messageBoxText = new javax.swing.JTextArea();
+        messageBoxLabel = new javax.swing.JLabel();
         settingsPanel = new javax.swing.JPanel();
         selectServerButton = new javax.swing.JButton();
         settingsLabel = new javax.swing.JLabel();
@@ -134,6 +138,12 @@ public class ClientUI extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         jLabel2.setText("Server");
 
+        messageBoxText.setColumns(20);
+        messageBoxText.setRows(5);
+        messageBox.setViewportView(messageBoxText);
+
+        messageBoxLabel.setText("MessageBox");
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
@@ -149,17 +159,26 @@ public class ClientUI extends javax.swing.JFrame {
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(settingsButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(listLocalFiles, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(buttonUpdateLocalList, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(buttonUploadLocalFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(buttonDeleteLocalFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 127, Short.MAX_VALUE)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(buttonUpdateServerList, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(buttonDownloadServerFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(buttonDeleteServerFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(mainPanelLayout.createSequentialGroup()
+                                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(buttonUpdateLocalList, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(buttonUploadLocalFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(buttonDeleteLocalFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 127, Short.MAX_VALUE)
+                                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(buttonUpdateServerList, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(buttonDownloadServerFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(buttonDeleteServerFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(messageBox))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addGap(130, 130, 130)
+                        .addComponent(messageBoxLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(listServerFiles, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(22, 22, 22))
         );
@@ -172,8 +191,7 @@ public class ClientUI extends javax.swing.JFrame {
                     .addComponent(jLabel2))
                 .addGap(20, 20, 20)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(listServerFiles, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(mainPanelLayout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(buttonUpdateLocalList)
                             .addComponent(buttonUpdateServerList))
@@ -184,9 +202,17 @@ public class ClientUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(buttonDeleteLocalFile)
-                            .addComponent(buttonDeleteServerFile)))
-                    .addComponent(listLocalFiles, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(buttonDeleteServerFile))
+                        .addGap(314, 314, 314))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(listServerFiles, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                                .addComponent(messageBoxLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(messageBox, javax.swing.GroupLayout.PREFERRED_SIZE, 236, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(listLocalFiles, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addComponent(settingsButton)
                 .addContainerGap(27, Short.MAX_VALUE))
         );
@@ -400,6 +426,11 @@ public class ClientUI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_buttonDeleteLocalFileActionPerformed
 
+    public void clientPopUpMessage(String message) {
+        JOptionPane.showMessageDialog(null, message);
+    }
+
+
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
 
         // Server toevoegen aan history 
@@ -461,7 +492,7 @@ public class ClientUI extends javax.swing.JFrame {
 
             // Lijst met files ophalen vanuit server
             ArrayList<String> r = serverHandler.getServerFileList();
-            
+
             for (String s : r) {
                 listServerFiles.add(s);
             }
@@ -483,18 +514,9 @@ public class ClientUI extends javax.swing.JFrame {
         } else {
             // File geselecteerd dan proberen op te halen
             try {
-                
+
                 serverHandler.getFileFromServer(listServerFiles.getSelectedItem());
                 buttonUpdateLocalListActionPerformed(evt);
-                
-//                JSONObject o = new JSONObject();
-//                Request.Type type = Request.Type.GET;
-//
-//                o.put("filename", Base64Encoded(listServerFiles.getSelectedItem()));
-//                Request r = new Request(type, o);
-//                String request = r.toString();
-//                serverHandler.getFileFromServer(request, location);
-//                buttonUpdateLocalListActionPerformed(evt);
 
             } catch (JSONException je) {
                 System.out.println(je.getMessage());
@@ -523,11 +545,17 @@ public class ClientUI extends javax.swing.JFrame {
                 System.out.println(je.getMessage());
             } catch (IOException ex) {
                 Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         }
 
     }//GEN-LAST:event_buttonUploadLocalFileActionPerformed
+
+    public void setMessageBoxText(String message) {
+        messageBoxText.append(message + "\n");
+    }
 
     private void getLocalFileList(String location) {
 
@@ -556,28 +584,27 @@ public class ClientUI extends javax.swing.JFrame {
 
         }
     }
-    
-    	/**
-	 * Utility method voor codering naar Base64.
-	 */
-	private static final String Base64Encoded(String source) {
-		String result = null;
-		try {
-			byte[] b = source.getBytes("UTF-8");
-			result = new String(Base64.getEncoder().encode(b));
-		} catch (UnsupportedEncodingException uce) {
-			result = "Encoding to Base64 failed.";
-		}
-		return result;
-	}
 
-	/**
-	 * Utility method voor decodering uit Base64.
-	 */
+    /**
+     * Utility method voor codering naar Base64.
+     */
+    private static final String Base64Encoded(String source) {
+        String result = null;
+        try {
+            byte[] b = source.getBytes("UTF-8");
+            result = new String(Base64.getEncoder().encode(b));
+        } catch (UnsupportedEncodingException uce) {
+            result = "Encoding to Base64 failed.";
+        }
+        return result;
+    }
 
-	private static final String Base64Decoded(String source) {
-		return new String(Base64.getDecoder().decode(source));
-	}
+    /**
+     * Utility method voor decodering uit Base64.
+     */
+    private static final String Base64Decoded(String source) {
+        return new String(Base64.getDecoder().decode(source));
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -600,6 +627,9 @@ public class ClientUI extends javax.swing.JFrame {
     private javax.swing.JTextField localFolderText;
     private javax.swing.JButton mainMenuButton;
     private javax.swing.JPanel mainPanel;
+    private javax.swing.JScrollPane messageBox;
+    private javax.swing.JLabel messageBoxLabel;
+    private javax.swing.JTextArea messageBoxText;
     private javax.swing.JButton selectServerButton;
     private javax.swing.JLabel serverIPPortLabel;
     private javax.swing.JTextField serverIPText;

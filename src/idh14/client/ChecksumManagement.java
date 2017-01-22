@@ -109,12 +109,12 @@ public final class ChecksumManagement {
                         System.out.println("LOKAAL & ARRAY = ZELFDE  -- > lokaal updaten toegestaan.");
                         update = true;
                         message = false;
-                        
+
                     } else {
                         System.out.println("LOKAAL & ARRAY = AFWIJKEND .. USER interactie gewenst");
                         message = true;
                     }
-                    if(function == "put"){
+                    if (function == "put") {
                         System.out.println("PUT functie --> checksum update !");
                         update = true;
                         message = false;
@@ -167,7 +167,7 @@ public final class ChecksumManagement {
 
         return writePermitted;
     }
-    
+
     public String getOriginalChecksumFromFile(String filename) throws FileNotFoundException, IOException, ClassNotFoundException {
 
         File f = new File(absolutePath);
@@ -182,24 +182,22 @@ public final class ChecksumManagement {
             oos.writeObject(fileList);
             oos.close();
         }
-        
-        
+
         FileInputStream fis = new FileInputStream(absolutePath);
         ObjectInputStream ois = new ObjectInputStream(fis);
         ArrayList<NewFileHandler> fileList = (ArrayList<NewFileHandler>) ois.readObject();
         String originalChecksum = null;
-        
+
         for (NewFileHandler arrayFile : fileList) {
-            if(arrayFile.getFileName().equals(filename)){
+            if (arrayFile.getFileName().equals(filename)) {
                 originalChecksum = arrayFile.getOriginalChecksum();
-                            System.out.println("Filename : " + arrayFile.getFileName());
-            System.out.println("Org - checksum : " + arrayFile.getOriginalChecksum());
+                System.out.println("Filename : " + arrayFile.getFileName());
+                System.out.println("Org - checksum : " + arrayFile.getOriginalChecksum());
             }
 
-            
         }
-        
+
         return originalChecksum;
     }
-    
+
 }
