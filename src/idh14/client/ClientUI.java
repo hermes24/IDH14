@@ -561,7 +561,7 @@ public class ClientUI extends javax.swing.JFrame {
             // File geselecteerd dan proberen te verzenden
             try {
 
-                serverHandler.deleteFileFromServer(listServerFiles.getSelectedItem());
+            serverHandler.deleteFileFromServer(listServerFiles.getSelectedItem());
 
             } catch (JSONException je) {
                 System.out.println(je.getMessage());

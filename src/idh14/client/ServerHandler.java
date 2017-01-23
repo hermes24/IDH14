@@ -279,6 +279,7 @@ public class ServerHandler implements Runnable {
         // Dit alles nu omtoveren naar request en versturen naar Server.
         Request r = new Request(Request.Type.DELETE, o);
         String request = r.toString();
+        System.out.println(r.toString());
         writer.write(request);
         writer.flush();
         clientui.setMessageBoxText("DELETE-Request verstuurd naar Server");
@@ -288,6 +289,7 @@ public class ServerHandler implements Runnable {
             JSONObject empty = new JSONObject();
             Response response = new Response(empty);
             response = new Response(empty).unMarshallResponse(reader);
+            System.out.println(response.toString());
 
             if (response.getBody().get("status").toString().contains("412")) {
                 clientui.setMessageBoxText("DELETE-Response - File niet verwijderd ivm mismatch");
@@ -303,7 +305,7 @@ public class ServerHandler implements Runnable {
             System.err.println(e.getMessage());
             stop(true);
         }
-
+        
     }
 
     private static byte[] loadFile(File file) throws IOException {
