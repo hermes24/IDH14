@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 
 public class DiskHandler {
@@ -26,13 +27,25 @@ public class DiskHandler {
 		File f = new File(directory + File.separator + filename);
 		LocalFileWrapper fileHandler = new LocalFileWrapper(f, messageDigest);
 		fileHandler.calculateChecksum();
-                fileHandler.getOriginalChecksum();
 		return fileHandler;
 	}
         
         public long getChecksumIntegrity() throws IOException{
             long numberOfFiles = Files.list(Paths.get(this.directory)).count();
             return numberOfFiles;
+        }
+        
+        public ArrayList<LocalFileWrapper> getFileWrappers() throws IOException{
+            	ArrayList<LocalFileWrapper> result = new ArrayList<>();
+		File d = new File(directory);
+		File[] l = d.listFiles();
+		// TODO: Crasht als de dir leeg is of niet bestaat (nog uitzoeken).
+		for (File f : l) {
+			LocalFileWrapper w = new LocalFileWrapper(f, messageDigest);
+			w.calculateChecksum();
+			result.add(w);
+		}
+		return result;
         }
 
 	public void deleteFile(String filename) throws IOException {

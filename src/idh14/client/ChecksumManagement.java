@@ -9,11 +9,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public final class ChecksumManagement {
-
+    
     private final String absolutePath;
-    private ArrayList<NewFileHandler> fileList;
+    private Collection<NewFileHandler> fileList;
     private final DiskHandler diskHandler;
 
     public ChecksumManagement(String absolutePath, DiskHandler diskHandler) throws FileNotFoundException, IOException, EOFException, ClassNotFoundException {
@@ -21,6 +22,7 @@ public final class ChecksumManagement {
         fileList = new ArrayList<>();
         load();
         this.diskHandler = diskHandler;
+        integrityCheck();
     }
 
     public void load() throws FileNotFoundException, IOException, ClassNotFoundException {
@@ -56,13 +58,7 @@ public final class ChecksumManagement {
         boolean checksumIntegrityCompromised = false;
         NewFileHandler arrayFile = null;
         LocalFileWrapper local = null;
-
-        if (fileList.size() != diskHandler.getChecksumIntegrity()) {
-            checksumIntegrityCompromised = true;
-
-            // Nog iets bouwen dat ik checksum history bijwerk als er ook maar iets gebeurt.
-            // Door bijvoorbeeld onverwacht lokaal verwijderen, etc ..
-        }
+        integrityCheck();
 
         for (NewFileHandler tempFile : fileList) {
 
@@ -142,7 +138,7 @@ public final class ChecksumManagement {
         return originalChecksum;
     }
 
-    public ArrayList<NewFileHandler> getArrayFromDisk() throws FileNotFoundException, IOException, ClassNotFoundException {
+    public Collection<NewFileHandler> getArrayFromDisk() throws FileNotFoundException, IOException, ClassNotFoundException {
         FileInputStream fis = new FileInputStream(absolutePath);
         ObjectInputStream ois = new ObjectInputStream(fis);
         fileList = (ArrayList<NewFileHandler>) ois.readObject();
@@ -158,4 +154,32 @@ public final class ChecksumManagement {
         oos.close();
     }
 
+    public void integrityCheck() throws IOException, FileNotFoundException, ClassNotFoundException {
+        System.out.println("Integrity Check !!!!!!!!!!!!!");
+        Collection<LocalFileWrapper> localList = diskHandler.getFileWrappers();
+        Collection<NewFileHandler> copyList = new ArrayList<>();
+        Collection<NewFileHandler> removeList = new ArrayList<>();
+        
+        for(NewFileHandler item : fileList){
+            copyList.add(item);
+        }
+
+        for (LocalFileWrapper item : localList) {
+            NewFileHandler file = new NewFileHandler(item.getFile().getName(), item.getChecksum());
+            removeList.add(file);
+            System.out.println("LocalItem welke we toevoegen aan de convertedList :" + item.getFile().getName());
+        }
+
+        fileList.clear();
+
+        for (NewFileHandler array : copyList) {
+            for (NewFileHandler remove : removeList) {
+                if (array.getFileName().equals(remove.getFileName())) {
+                    fileList.add(remove);
+                }
+            }
+        }
+        copyList.clear();
+        removeList.clear();
+    }
 }

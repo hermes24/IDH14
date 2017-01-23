@@ -11,7 +11,6 @@ public class LocalFileWrapper {
     private final File file;
     private final MessageDigest messageDigest;
     private String checksum;
-    private String originalChecksum;
 
     // TODO: historie van checksums in een ArrayList o.i.d.
     public LocalFileWrapper(File file, MessageDigest messageDigest) {
@@ -45,10 +44,5 @@ public class LocalFileWrapper {
         return checksum;
     }
 
-    public String getOriginalChecksum() {
-        
-        originalChecksum = "xxxxxx"; 
-        return originalChecksum;
-    }
 
 }
