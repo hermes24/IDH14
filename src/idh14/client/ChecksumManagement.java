@@ -14,11 +14,11 @@ public final class ChecksumManagement {
 
     private final String absolutePath;
     private ArrayList<NewFileHandler> fileList;
-    private DiskHandler diskHandler;
+    private final DiskHandler diskHandler;
 
     public ChecksumManagement(String absolutePath, DiskHandler diskHandler) throws FileNotFoundException, IOException, EOFException, ClassNotFoundException {
         this.absolutePath = absolutePath;
-        fileList = new ArrayList<NewFileHandler>();
+        fileList = new ArrayList<>();
         load();
         this.diskHandler = diskHandler;
     }
@@ -34,21 +34,11 @@ public final class ChecksumManagement {
             if (!exists) {
                 f.createNewFile();
             }
-
             // Objectinputstream werkt niet op niet bestaande of lege file.
             // Checken of er iets in de file zit, zoja dan lezen.
             if (length > 1) {
-                FileInputStream fis = new FileInputStream(absolutePath);
-                ObjectInputStream ois = new ObjectInputStream(fis);
-                ArrayList<NewFileHandler> fileList = (ArrayList<NewFileHandler>) ois.readObject();
-                //getArrayFromDisk();
-                FileOutputStream fos = new FileOutputStream(absolutePath);
-                ObjectOutputStream oos = new ObjectOutputStream(fos);
-                oos.writeObject(fileList);
-                oos.close();
-                System.out.println("Aantal objecten in arraylist :" + fileList.size());
+                getArrayFromDisk();
             }
-
         } catch (Exception e) {
             e.getMessage();
             e.printStackTrace();
@@ -67,109 +57,70 @@ public final class ChecksumManagement {
         NewFileHandler arrayFile = null;
         LocalFileWrapper local = null;
 
-        if (length < 10) {
+        if (fileList.size() != diskHandler.getChecksumIntegrity()) {
+            checksumIntegrityCompromised = true;
 
-            System.out.println("FILE-LENGTH < 10 // Voegen we eerst een lege array aan de file toe");
-            // Eerst iets aanmaken anders krijgen we een NULLpointer op de objectinputstream
-            FileOutputStream fos = new FileOutputStream(absolutePath);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(fileList);
-            oos.close();
+            // Nog iets bouwen dat ik checksum history bijwerk als er ook maar iets gebeurt.
+            // Door bijvoorbeeld onverwacht lokaal verwijderen, etc ..
+        }
 
-            // Nu array vullen
-            getArrayFromDisk();
-                    
-            // Array Opslaan 1e keer.
-            fileList.add(fileFromServer);
-            System.out.println("En hier de 1e ADD ooit !");
-            add = false;
-            FileOutputStream fos2 = new FileOutputStream(absolutePath);
-            ObjectOutputStream oos2 = new ObjectOutputStream(fos2);
-            oos2.writeObject(fileList);
-            oos2.close();
+        for (NewFileHandler tempFile : fileList) {
 
-        } else {
-
-            // Array lokaal aanwezig. Dus nu nadenken over het toevoegen
-            getArrayFromDisk();
-            System.out.println("Aantal objecten in arraylist :" + fileList.size());
-            System.out.println("Aantal files in client folder :" + diskHandler.getChecksumIntegrity());
-            
-            if(fileList.size() != diskHandler.getChecksumIntegrity()){
-                checksumIntegrityCompromised = true;
-                
-                // Nog iets bouwen dat ik checksum history bijwerk als er ook maar iets gebeurt.
-                // Door bijvoorbeeld onverwacht lokaal verwijderen, etc ..
-            }
-            
-
-            for (NewFileHandler tempFile : fileList) {
-
-                // Aanwezig lokaal = UPDATE anders ADD
-                if (tempFile.getFileName().equals(fileFromServer.getFileName())) {
-                    add = false;
-                    arrayFile = tempFile;
-
-                    local = diskHandler.getFileWrapper(tempFile.getFileName());
-                    if (local.getChecksum().equals(arrayFile.getOriginalChecksum())) {
-
-                        System.out.println("LOKAAL & ARRAY = ZELFDE  -- > lokaal updaten toegestaan.");
-                        update = true;
-                        message = false;
-
-                    } else {
-                        System.out.println("LOKAAL & ARRAY = AFWIJKEND .. USER interactie gewenst");
-                        message = true;
-                    }
-                    if (function == "put") {
-                        System.out.println("PUT functie --> checksum update !");
-                        update = true;
-                        message = false;
-                    }
-                }
-            }
-
-            while (add) {
-                System.out.println("ADD LOOP");
-                fileList.add(fileFromServer);
-
-                FileOutputStream fos2 = new FileOutputStream(absolutePath);
-                ObjectOutputStream oos2 = new ObjectOutputStream(fos2);
-                oos2.writeObject(fileList);
-                oos2.close();
+            // Aanwezig lokaal = UPDATE anders ADD
+            if (tempFile.getFileName().equals(fileFromServer.getFileName())) {
                 add = false;
-            }
+                arrayFile = tempFile;
 
-            while (update) {
+                local = diskHandler.getFileWrapper(tempFile.getFileName());
+                if (local.getChecksum().equals(arrayFile.getOriginalChecksum())) {
 
-                if (!arrayFile.getOriginalChecksum().equals(fileFromServer.getOriginalChecksum())) {
-                    System.out.println("SERVER FILE = nieuwer .. UPDATE LOKAAL");
-                    fileList.remove(arrayFile);
-                    fileList.add(fileFromServer);
+                    System.out.println("LOKAAL & ARRAY = ZELFDE  -- > lokaal updaten toegestaan.");
+                    update = true;
+                    message = false;
 
                 } else {
-                    System.out.println("FILE-EXISTS = TRUE // Maar lokale en serverfile checksum komen overeen, dus doe NIETS");
+                    System.out.println("LOKAAL & ARRAY = AFWIJKEND .. USER interactie gewenst");
+                    message = true;
                 }
+                if ("put".equals(function)) {
+                    System.out.println("PUT functie --> checksum update !");
+                    update = true;
+                    message = false;
+                }
+            }
+        }
 
-                FileOutputStream fos2 = new FileOutputStream(absolutePath);
-                ObjectOutputStream oos2 = new ObjectOutputStream(fos2);
-                oos2.writeObject(fileList);
-                oos2.close();
-                update = false;
+        while (add) {
+            System.out.println("ADD LOOP");
+            fileList.add(fileFromServer);
+            putArrayToDisk();
+            add = false;
+            System.out.println("Aantal objecten in arraylist NA ADD: " + fileList.size());
+            System.out.println("Aantal files in client folder NA ADD: " + diskHandler.getChecksumIntegrity());
+        }
 
+        while (update) {
+
+            if (!arrayFile.getOriginalChecksum().equals(fileFromServer.getOriginalChecksum())) {
+                System.out.println("SERVER FILE OF UPDATE FILE = nieuwer .. UPDATE Administratie");
+                fileList.remove(arrayFile);
+                fileList.add(fileFromServer);
+
+            } else {
+                System.out.println("FILE-EXISTS = TRUE // Maar lokale en serverfile checksum komen overeen, dus doe NIETS");
             }
 
-            while (message) {
-                System.out.println("Message to user ?");
-                message = false;
-                writePermitted = false;
-            }
+            putArrayToDisk();
+            update = false;
+            System.out.println("Aantal objecten in arraylist NA UPDATE: " + fileList.size());
+            System.out.println("Aantal files in client folder NA UPDATE: " + diskHandler.getChecksumIntegrity());
 
-            FileOutputStream fos2 = new FileOutputStream(absolutePath);
-            ObjectOutputStream oos2 = new ObjectOutputStream(fos2);
-            oos2.writeObject(fileList);
-            oos2.close();
+        }
 
+        while (message) {
+            System.out.println("Message to user ?");
+            message = false;
+            writePermitted = false;
         }
 
         return writePermitted;
@@ -177,22 +128,7 @@ public final class ChecksumManagement {
 
     public String getOriginalChecksumFromFile(String filename) throws FileNotFoundException, IOException, ClassNotFoundException {
 
-        File f = new File(absolutePath);
-        long length = f.length();
-
-        if (length < 10) {
-
-            System.out.println("FILE-LENGTH < 10 // Voegen we eerst een lege array aan de file toe");
-            // Eerst iets aanmaken anders krijgen we een NULLpointer op de objectinputstream
-            FileOutputStream fos = new FileOutputStream(absolutePath);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(fileList);
-            oos.close();
-        }
-
-        FileInputStream fis = new FileInputStream(absolutePath);
-        ObjectInputStream ois = new ObjectInputStream(fis);
-        ArrayList<NewFileHandler> fileList = (ArrayList<NewFileHandler>) ois.readObject();
+        System.out.println("getOriginalChecksumFromFile OPERATIE");
         String originalChecksum = null;
 
         for (NewFileHandler arrayFile : fileList) {
@@ -201,17 +137,25 @@ public final class ChecksumManagement {
                 System.out.println("Filename : " + arrayFile.getFileName());
                 System.out.println("Org - checksum : " + arrayFile.getOriginalChecksum());
             }
-
         }
-
+        putArrayToDisk();
         return originalChecksum;
     }
-    
-    public ArrayList<NewFileHandler> getArrayFromDisk() throws FileNotFoundException, IOException, ClassNotFoundException{
+
+    public ArrayList<NewFileHandler> getArrayFromDisk() throws FileNotFoundException, IOException, ClassNotFoundException {
         FileInputStream fis = new FileInputStream(absolutePath);
         ObjectInputStream ois = new ObjectInputStream(fis);
-        ArrayList<NewFileHandler> fileList = (ArrayList<NewFileHandler>) ois.readObject();
+        fileList = (ArrayList<NewFileHandler>) ois.readObject();
+        System.out.println("getArrayFromDisk OPERATIE");
         return fileList;
+    }
+
+    public void putArrayToDisk() throws FileNotFoundException, IOException {
+        FileOutputStream fos = new FileOutputStream(absolutePath);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        oos.writeObject(fileList);
+        System.out.println("putArrayToDisk OPERATIE");
+        oos.close();
     }
 
 }

@@ -30,7 +30,7 @@ public class Server implements Runnable {
 	 * Default port is 54321. Gebruikt indien geen poortnummer is opgegeven in
 	 * de configuratie of via de command line.
 	 */
-	public static final int DEFAULT_PORT = 5432;
+	public static final int DEFAULT_PORT = 54321;
 
 	/**
 	 * Opslag van files (in een directory).
