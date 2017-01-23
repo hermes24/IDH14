@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public final class ChecksumManagement {
 
-    private String absolutePath;
+    private final String absolutePath;
     private ArrayList<NewFileHandler> fileList;
     private DiskHandler diskHandler;
 
@@ -41,6 +41,7 @@ public final class ChecksumManagement {
                 FileInputStream fis = new FileInputStream(absolutePath);
                 ObjectInputStream ois = new ObjectInputStream(fis);
                 ArrayList<NewFileHandler> fileList = (ArrayList<NewFileHandler>) ois.readObject();
+                //getArrayFromDisk();
                 FileOutputStream fos = new FileOutputStream(absolutePath);
                 ObjectOutputStream oos = new ObjectOutputStream(fos);
                 oos.writeObject(fileList);
@@ -76,10 +77,8 @@ public final class ChecksumManagement {
             oos.close();
 
             // Nu array vullen
-            FileInputStream fis = new FileInputStream(absolutePath);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            ArrayList<NewFileHandler> fileList = (ArrayList<NewFileHandler>) ois.readObject();
-
+            getArrayFromDisk();
+                    
             // Array Opslaan 1e keer.
             fileList.add(fileFromServer);
             System.out.println("En hier de 1e ADD ooit !");
@@ -92,9 +91,7 @@ public final class ChecksumManagement {
         } else {
 
             // Array lokaal aanwezig. Dus nu nadenken over het toevoegen
-            FileInputStream fis = new FileInputStream(absolutePath);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            ArrayList<NewFileHandler> fileList = (ArrayList<NewFileHandler>) ois.readObject();
+            getArrayFromDisk();
             System.out.println("Aantal objecten in arraylist :" + fileList.size());
             System.out.println("Aantal files in client folder :" + diskHandler.getChecksumIntegrity());
             
@@ -208,6 +205,13 @@ public final class ChecksumManagement {
         }
 
         return originalChecksum;
+    }
+    
+    public ArrayList<NewFileHandler> getArrayFromDisk() throws FileNotFoundException, IOException, ClassNotFoundException{
+        FileInputStream fis = new FileInputStream(absolutePath);
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        ArrayList<NewFileHandler> fileList = (ArrayList<NewFileHandler>) ois.readObject();
+        return fileList;
     }
 
 }
