@@ -1,9 +1,6 @@
 package idh14.client;
 
-import idh14.protocol.Request;
-import idh14.protocol.Response;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
@@ -18,9 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * File Sharing
@@ -131,6 +126,11 @@ public class ClientUI extends javax.swing.JFrame {
         });
 
         buttonDeleteServerFile.setText("Delete");
+        buttonDeleteServerFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonDeleteServerFileActionPerformed(evt);
+            }
+        });
 
         jLabel1.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         jLabel1.setText("Local");
@@ -552,6 +552,25 @@ public class ClientUI extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_buttonUploadLocalFileActionPerformed
+
+    private void buttonDeleteServerFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteServerFileActionPerformed
+        // Geen file geselecteerd is melding        
+        if (listServerFiles.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(null, "Please select a file");
+        } else {
+            // File geselecteerd dan proberen te verzenden
+            try {
+
+                serverHandler.deleteFileFromServer(listServerFiles.getSelectedItem());
+
+            } catch (JSONException je) {
+                System.out.println(je.getMessage());
+            } catch (IOException ex) {
+                Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
+
+            }
+        }
+    }//GEN-LAST:event_buttonDeleteServerFileActionPerformed
 
     public void setMessageBoxText(String message) {
         messageBoxText.append(message + "\n");

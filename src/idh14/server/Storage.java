@@ -61,7 +61,7 @@ public class Storage {
 	
 	public void deleteFile(String filename) throws IOException {
 		File f = new File(directory + File.separator + filename);
-		//f.delete();
+		f.delete();
 		System.out.println("Aargh!! Bestand is weg! (maar niet heus)");
 	}
 	

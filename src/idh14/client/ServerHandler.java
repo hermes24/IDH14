@@ -265,6 +265,46 @@ public class ServerHandler implements Runnable {
         }
 
     }
+    
+    public void deleteFileFromServer(String selectedItem) throws IOException {
+
+        // Aanmaken benodigdheden om request te vullen.
+        JSONObject o = new JSONObject();
+        LocalFileWrapper f = diskHandler.getFileWrapper(selectedItem);
+
+        // JSON object vullen met juiste velden.
+        o.put("filename", Base64Encoded(selectedItem));
+        o.put("checksum", f.getChecksum());
+
+        // Dit alles nu omtoveren naar request en versturen naar Server.
+        Request r = new Request(Request.Type.DELETE, o);
+        String request = r.toString();
+        writer.write(request);
+        writer.flush();
+        clientui.setMessageBoxText("DELETE-Request verstuurd naar Server");
+
+        try {
+            // Verwerk het response vanuit de Server
+            JSONObject empty = new JSONObject();
+            Response response = new Response(empty);
+            response = new Response(empty).unMarshallResponse(reader);
+
+            if (response.getBody().get("status").toString().contains("412")) {
+                clientui.setMessageBoxText("DELETE-Response - File niet verwijderd ivm mismatch");
+
+            } else if(response.getBody().get("status").toString().contains("404")){
+                clientui.setMessageBoxText("DELETE-Response - Bestand niet gevonden @ server");
+            } else {
+                clientui.setMessageBoxText("DELETE-Response - Bestand is verwijderd van de server");
+                getServerFileList();
+            }
+
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            stop(true);
+        }
+
+    }
 
     private static byte[] loadFile(File file) throws IOException {
         InputStream is = new FileInputStream(file);

@@ -155,7 +155,6 @@ public final class ChecksumManagement {
     }
 
     public void integrityCheck() throws IOException, FileNotFoundException, ClassNotFoundException {
-        System.out.println("Integrity Check !!!!!!!!!!!!!");
         Collection<LocalFileWrapper> localList = diskHandler.getFileWrappers();
         Collection<NewFileHandler> copyList = new ArrayList<>();
         Collection<NewFileHandler> removeList = new ArrayList<>();
@@ -167,7 +166,6 @@ public final class ChecksumManagement {
         for (LocalFileWrapper item : localList) {
             NewFileHandler file = new NewFileHandler(item.getFile().getName(), item.getChecksum());
             removeList.add(file);
-            System.out.println("LocalItem welke we toevoegen aan de convertedList :" + item.getFile().getName());
         }
 
         fileList.clear();
