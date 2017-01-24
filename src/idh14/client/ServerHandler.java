@@ -270,42 +270,46 @@ public class ServerHandler implements Runnable {
 
         // Aanmaken benodigdheden om request te vullen.
         JSONObject o = new JSONObject();
-        LocalFileWrapper f = diskHandler.getFileWrapper(selectedItem);
-        
-        // Nog iets toevoegen dat als de file lokaal niet gevonden kan, de gebruiker een melding krijgt.
-        
-        // JSON object vullen met juiste velden.
-        o.put("filename", Base64Encoded(selectedItem));
-        o.put("checksum", f.getChecksum());
+        if (diskHandler.checkLocalFileExist(selectedItem)) {
+            LocalFileWrapper f = diskHandler.getFileWrapper(selectedItem);
 
-        // Dit alles nu omtoveren naar request en versturen naar Server.
-        Request r = new Request(Request.Type.DELETE, o);
-        String request = r.toString();
-        System.out.println(r.toString());
-        writer.write(request);
-        writer.flush();
-        clientui.setMessageBoxText("DELETE-Request verstuurd naar Server");
+            // Nog iets toevoegen dat als de file lokaal niet gevonden kan, de gebruiker een melding krijgt.
+            // JSON object vullen met juiste velden.
+            o.put("filename", Base64Encoded(selectedItem));
+            o.put("checksum", f.getChecksum());
 
-        try {
-            // Verwerk het response vanuit de Server
-            JSONObject empty = new JSONObject();
-            Response response = new Response(empty);
-            response = new Response(empty).unMarshallResponse(reader);
-            System.out.println(response.toString());
+            // Dit alles nu omtoveren naar request en versturen naar Server.
+            Request r = new Request(Request.Type.DELETE, o);
+            String request = r.toString();
+            System.out.println(r.toString());
+            writer.write(request);
+            writer.flush();
+            clientui.setMessageBoxText("DELETE-Request verstuurd naar Server");
 
-            if (response.getBody().get("status").toString().contains("412")) {
-                clientui.setMessageBoxText("DELETE-Response - File niet verwijderd ivm mismatch");
+            try {
+                // Verwerk het response vanuit de Server
+                JSONObject empty = new JSONObject();
+                Response response = new Response(empty);
+                response = new Response(empty).unMarshallResponse(reader);
+                System.out.println(response.toString());
 
-            } else if(response.getBody().get("status").toString().contains("404")){
-                clientui.setMessageBoxText("DELETE-Response - Bestand niet gevonden @ server");
-            } else {
-                clientui.setMessageBoxText("DELETE-Response - Bestand is verwijderd van de server");
-                getServerFileList();
+                if (response.getBody().get("status").toString().contains("412")) {
+                    clientui.setMessageBoxText("DELETE-Response - File niet verwijderd ivm mismatch");
+
+                } else if (response.getBody().get("status").toString().contains("404")) {
+                    clientui.setMessageBoxText("DELETE-Response - Bestand niet gevonden @ server");
+                } else {
+                    clientui.setMessageBoxText("DELETE-Response - Bestand is verwijderd van de server");
+                    getServerFileList();
+                }
+
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+                stop(true);
             }
 
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-            stop(true);
+        } else {
+            clientui.setMessageBoxText("DELETE-Response - Verwijderen niet toegestaan. File niet van client.");
         }
         
     }

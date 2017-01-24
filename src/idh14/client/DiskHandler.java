@@ -30,6 +30,15 @@ public class DiskHandler {
 		return fileHandler;
 	}
         
+        public boolean checkLocalFileExist(String filename){
+            boolean exist = false;
+            File f = new File(directory + File.separator + filename);
+            if(f.exists()){
+                exist = true;
+            }
+            return exist;
+        }
+        
         public long getChecksumIntegrity() throws IOException{
             long numberOfFiles = Files.list(Paths.get(this.directory)).count();
             return numberOfFiles;

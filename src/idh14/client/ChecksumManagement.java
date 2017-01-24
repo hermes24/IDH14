@@ -59,25 +59,40 @@ public final class ChecksumManagement {
         NewFileHandler arrayFile = null;
         LocalFileWrapper local = null;
         integrityCheck();
+        getArrayFromDisk();
 
+        // Door array heen loopen 
         for (NewFileHandler tempFile : fileList) {
 
-            // Aanwezig lokaal = UPDATE anders ADD
+            // Aanwezig lokaal aanwezig = UPDATE(aanpassen) anders sowieso een ADD
             if (tempFile.getFileName().equals(fileFromServer.getFileName())) {
+                // File is aanwezig in Array Add is dus false ! 
+                // Update actief.
                 add = false;
                 arrayFile = tempFile;
-
+                
+                // Nu de file welke daadwerkelijk op disk staat matchen met de file die in de array zit.
+                
                 local = diskHandler.getFileWrapper(tempFile.getFileName());
                 if (local.getChecksum().equals(arrayFile.getOriginalChecksum())) {
-
+                    // local en array is hetzelfde dus we mogen de nieuwe checksum gaan wegschrijven in de administratie.
                     System.out.println("LOKAAL & ARRAY = ZELFDE  -- > lokaal updaten toegestaan.");
                     update = true;
                     message = false;
 
                 } else {
+                    // De locale file en de file in de array zijn afwijkend. 
+                    // @ Disk staat een client v2 // in administratie zit een client v1 // File van server is een server v2.
+                    // Gebruikersinteractie gewenst om iets met lokale file te doen. 
                     System.out.println("LOKAAL & ARRAY = AFWIJKEND .. USER interactie gewenst");
                     message = true;
                 }
+                // Er is 1 uitzondering. Als de PUT functie gebruikt wordt om een nieuwe file naar de server te pushen.
+                // Voorbeeld: Als de LOCALE file gewijzigd is, maar deze is nog niet bijgewerkt in de administratie, doordat er nog een handelingen 
+                // zijn uitgevoerd in de app, dan mag je wel pushen naar de server. Lokaal v2. Administratie v1 en server v1. 
+                // Bij het pushen van v2 naar de server moeten we ook de checksum bijwerken in de administratie naar v2.
+                // Dus UPDATE en geen Message naar gebruiker.
+                
                 if ("put".equals(function)) {
                     System.out.println("PUT functie --> checksum update !");
                     update = true;
