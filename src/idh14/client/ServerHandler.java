@@ -271,7 +271,9 @@ public class ServerHandler implements Runnable {
         // Aanmaken benodigdheden om request te vullen.
         JSONObject o = new JSONObject();
         LocalFileWrapper f = diskHandler.getFileWrapper(selectedItem);
-
+        
+        // Nog iets toevoegen dat als de file lokaal niet gevonden kan, de gebruiker een melding krijgt.
+        
         // JSON object vullen met juiste velden.
         o.put("filename", Base64Encoded(selectedItem));
         o.put("checksum", f.getChecksum());
