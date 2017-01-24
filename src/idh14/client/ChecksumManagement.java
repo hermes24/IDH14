@@ -58,22 +58,22 @@ public final class ChecksumManagement {
         boolean checksumIntegrityCompromised = false;
         NewFileHandler arrayFile = null;
         LocalFileWrapper local = null;
-        integrityCheck();
         getArrayFromDisk();
-
+        integrityCheck();
+        
         // Door array heen loopen 
-        for (NewFileHandler tempFile : fileList) {
+        for (NewFileHandler adminFile : fileList) {
 
-            // Aanwezig lokaal aanwezig = UPDATE(aanpassen) anders sowieso een ADD
-            if (tempFile.getFileName().equals(fileFromServer.getFileName())) {
+            // Aanwezig lokaal = UPDATE(aanpassen) anders sowieso een ADD
+            if (adminFile.getFileName().equals(fileFromServer.getFileName())) {
                 // File is aanwezig in Array Add is dus false ! 
                 // Update actief.
                 add = false;
-                arrayFile = tempFile;
+                arrayFile = adminFile;
                 
                 // Nu de file welke daadwerkelijk op disk staat matchen met de file die in de array zit.
                 
-                local = diskHandler.getFileWrapper(tempFile.getFileName());
+                local = diskHandler.getFileWrapper(adminFile.getFileName());
                 if (local.getChecksum().equals(arrayFile.getOriginalChecksum())) {
                     // local en array is hetzelfde dus we mogen de nieuwe checksum gaan wegschrijven in de administratie.
                     System.out.println("LOKAAL & ARRAY = ZELFDE  -- > lokaal updaten toegestaan.");
@@ -149,6 +149,12 @@ public final class ChecksumManagement {
                 System.out.println("Org - checksum : " + arrayFile.getOriginalChecksum());
             }
         }
+        if(originalChecksum == null){
+            LocalFileWrapper lfw = diskHandler.getFileWrapper(filename);
+            originalChecksum = lfw.getChecksum();
+        }
+        
+        System.out.println("Orignal CheckSum van PUT FILE :" + originalChecksum);
         putArrayToDisk();
         return originalChecksum;
     }
@@ -167,6 +173,18 @@ public final class ChecksumManagement {
         oos.writeObject(fileList);
         System.out.println("putArrayToDisk OPERATIE");
         oos.close();
+    }
+    
+    public void deleteRecordFromArray(String deleteFile) throws IOException{
+        NewFileHandler itemToRemove = null;
+        for(NewFileHandler array : fileList){
+            if(array.getFileName().equals(deleteFile)){
+                itemToRemove = array;
+            }
+        
+        }
+        fileList.remove(itemToRemove);
+        putArrayToDisk();
     }
 
     public void integrityCheck() throws IOException, FileNotFoundException, ClassNotFoundException {
@@ -188,7 +206,7 @@ public final class ChecksumManagement {
         for (NewFileHandler array : copyList) {
             for (NewFileHandler remove : removeList) {
                 if (array.getFileName().equals(remove.getFileName())) {
-                    fileList.add(remove);
+                    fileList.add(array);
                 }
             }
         }

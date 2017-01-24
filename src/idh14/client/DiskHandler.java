@@ -59,9 +59,21 @@ public class DiskHandler {
 
 	public void deleteFile(String filename) throws IOException {
 		File f = new File(directory + File.separator + filename);
-		//f.delete();
+		f.delete();
 		System.out.println("Aargh!! Bestand is weg! (maar niet heus)");
 	}
+        
+        public boolean renameLocalFile(String localFile, String newFile){
+           System.out.println("renameLocalFile OPERATIE !");
+           boolean rename = false;
+           File f = new File(directory + File.separator + localFile);
+           f.renameTo(new File(directory + File.separator + newFile));
+           File renamedFile = new File(directory + File.separator + newFile);
+           if(renamedFile.exists()){
+               rename = true;
+           }
+           return rename;
+        }
 	
 	public String getDirectory() {
 		return directory;

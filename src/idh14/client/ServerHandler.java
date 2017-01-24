@@ -110,6 +110,7 @@ public class ServerHandler implements Runnable {
                 response = new Response(empty).unMarshallResponse(reader);
                 
                 clientui.setMessageBoxText("File list opgehaald, Status : " + response.getBody().get("status"));
+
                 
                 JSONArray list = new JSONArray();
                 list = response.getBody().getJSONArray("files");
@@ -200,8 +201,37 @@ public class ServerHandler implements Runnable {
                 } else {
                     
                     // False is User om interactie vragen.
-                    clientui.clientPopUpMessage("Fout - Lokaal bijwerken niet mogelijk ivm versie verschillen");
-                    clientui.setMessageBoxText("GET-Response - Administratie niet bijgewerkt ivm Error");
+                    //clientui.clientPopUpMessage("Fout - Lokaal bijwerken niet mogelijk ivm versie verschillen");
+                    //clientui.setMessageBoxText("GET-Response - Administratie niet bijgewerkt ivm Error");
+                    String newName = clientui.clientPopUpMessageWithAction();
+                    // Drukken ze op CANCEL, dan doen we niets.
+                    if(newName != "CANCEL"){
+                        System.out.println("Toepassen button is ingedrukt");
+                        System.out.println("Huidige filename : " + filename + " Nieuwe filename : " + newName);
+                        // Kiezen ze voor toepassen, dan verplaatsen we de lokale file
+                        // en gaan we de ontvangen file alsnog schrijven.
+                        if (diskHandler.renameLocalFile(filename, newName)) {
+                            System.out.println("Rename is geslaagd.");
+                            
+                            // File from server schrijven
+                            fos = new FileOutputStream(location + filename);
+                            byte[] buffer = e.decode(content);
+                            fos.write(buffer);
+                            
+                            // checksum op orde maken
+                            LocalFileWrapper f = diskHandler.getFileWrapper(newName);
+                            NewFileHandler renamedFile = new NewFileHandler(f.getFile().getName(), f.getChecksum());
+                            
+                            // Record verwijderen uit administratie
+                            admini.deleteRecordFromArray(filename);
+                            
+                            // Administratie updaten met nieuw record.
+                            admini.addOrUpdate(renamedFile, "get");
+                            
+                        }
+                    }
+                    System.out.println(newName);
+                    
                 }
 
             } catch (IOException e) {

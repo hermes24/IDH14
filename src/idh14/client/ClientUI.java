@@ -14,7 +14,10 @@ import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import org.json.JSONException;
 
 /**
@@ -428,6 +431,28 @@ public class ClientUI extends javax.swing.JFrame {
 
     public void clientPopUpMessage(String message) {
         JOptionPane.showMessageDialog(null, message);
+    }
+    
+    public String clientPopUpMessageWithAction() {
+        //JOptionPane.showMessageDialog(null, message);
+
+        Object[] options1 = {"Toepassen", "Cancel"};
+
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Nieuwe naam lokale file : "));
+        JTextField textField = new JTextField(25);
+        panel.add(textField);
+
+        int result = JOptionPane.showOptionDialog(null, panel, "Error - Lokale file is aangepast. Downloaden niet mogelijk.",
+                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+                null, options1, null);
+        String returnMessage = null;
+        System.out.println("Nieuwe Filenaam : " + textField.getText());
+        if(textField.getText() == null){
+            returnMessage = "CANCEL";
+        }
+        return textField.getText();
+
     }
 
 
