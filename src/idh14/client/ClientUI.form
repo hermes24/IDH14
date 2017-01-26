@@ -73,33 +73,41 @@
                       <Component id="settingsButton" max="32767" attributes="0"/>
                       <Component id="listLocalFiles" pref="300" max="32767" attributes="0"/>
                   </Group>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" attributes="0">
-                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                      <Component id="buttonUpdateLocalList" max="32767" attributes="0"/>
-                                      <Component id="buttonUploadLocalFile" max="32767" attributes="0"/>
-                                      <Component id="buttonDeleteLocalFile" max="32767" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace pref="127" max="32767" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                      <Component id="buttonUpdateServerList" max="32767" attributes="0"/>
-                                      <Component id="buttonDownloadServerFile" max="32767" attributes="0"/>
-                                      <Component id="buttonDeleteServerFile" max="32767" attributes="0"/>
-                                  </Group>
-                              </Group>
-                              <Component id="messageBox" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="buttonUpdateLocalList" max="32767" attributes="0"/>
+                              <Component id="buttonUploadLocalFile" max="32767" attributes="0"/>
+                              <Component id="buttonPutAll" alignment="0" max="32767" attributes="0"/>
                           </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="-2" pref="130" max="-2" attributes="0"/>
-                          <Component id="messageBoxLabel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="103" alignment="1" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="buttonUpdateServerList" max="32767" attributes="0"/>
+                                  <Component id="buttonDownloadServerFile" max="32767" attributes="0"/>
+                              </Group>
+                              <Component id="buttonGetAll" alignment="1" min="-2" pref="91" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <Component id="messageBox" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Component id="buttonDeleteLocalFile" min="-2" pref="94" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="102" alignment="0" attributes="0">
+                                  <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
+                                  <Component id="messageBoxLabel" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="1" attributes="0">
+                                  <EmptySpace min="-2" pref="127" max="-2" attributes="0"/>
+                                  <Component id="buttonDeleteServerFile" min="-2" pref="91" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
                       </Group>
                   </Group>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="listServerFiles" min="-2" pref="300" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="22" max="-2" attributes="0"/>
               </Group>
@@ -114,37 +122,46 @@
                       <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="1" attributes="0">
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="buttonUpdateLocalList" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="buttonUpdateServerList" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="buttonUploadLocalFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="buttonDownloadServerFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="buttonDeleteLocalFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="buttonDeleteServerFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" pref="314" max="-2" attributes="0"/>
-                      </Group>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="listServerFiles" max="32767" attributes="0"/>
+                      <Component id="listLocalFiles" alignment="0" max="32767" attributes="0"/>
                       <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="listServerFiles" pref="400" max="32767" attributes="0"/>
-                              <Group type="102" alignment="1" attributes="0">
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Group type="102" attributes="0">
                                   <Component id="messageBoxLabel" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="messageBox" min="-2" pref="236" max="-2" attributes="0"/>
                               </Group>
-                              <Component id="listLocalFiles" alignment="0" max="32767" attributes="0"/>
+                              <Group type="102" attributes="0">
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="buttonUpdateLocalList" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="buttonUpdateServerList" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="buttonUploadLocalFile" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="buttonDownloadServerFile" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                                          <Component id="buttonGetAll" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="buttonDeleteServerFile" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+                                          <Component id="buttonPutAll" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                          <Component id="buttonDeleteLocalFile" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                  </Group>
+                                  <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="messageBox" min="-2" pref="236" max="-2" attributes="0"/>
                       </Group>
                   </Group>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="settingsButton" min="-2" max="-2" attributes="0"/>
                   <EmptySpace pref="27" max="32767" attributes="0"/>
               </Group>
@@ -248,6 +265,22 @@
             <Property name="text" type="java.lang.String" value="MessageBox"/>
           </Properties>
         </Component>
+        <Component class="javax.swing.JButton" name="buttonPutAll">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Put All"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonPutAllActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="buttonGetAll">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Get All"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonGetAllActionPerformed"/>
+          </Events>
+        </Component>
       </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="settingsPanel">
@@ -298,7 +331,7 @@
                           </Group>
                       </Group>
                   </Group>
-                  <EmptySpace pref="43" max="32767" attributes="0"/>
+                  <EmptySpace pref="45" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
